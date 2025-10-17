@@ -1,0 +1,36 @@
+# Host attributes
+hosts.city: hosts.city
+hosts.state: hosts.state
+hosts.region: hosts.region
+hosts.country: hosts.country
+hosts.status: hosts.status
+hosts.category: hosts.category
+hosts.dealer_id: hosts.dealer_id
+hosts.programmatic_id: hosts.programmatic_id
+hosts.install_date: hosts.install_date
+hosts.date_created: hosts.date_created
+hosts.date_updated: hosts.date_updated
+
+# Dealer attributes
+dealers.dealer_id: dealers.dealer_id
+dealers.business_name: dealers.business_name
+dealers.city: dealers.city
+dealers.state: dealers.state
+dealers.region: dealers.region
+dealers.dealer_type: dealers.dealer_type
+dealers.status: dealers.status
+dealers.start_date: dealers.start_date
+dealers.date_created: dealers.date_created
+dealers.date_updated: dealers.date_updated
+
+# License attributes
+licenses.dealer_id: licenses.dealer_id
+licenses.host_id: licenses.host_id
+licenses.is_registered: licenses.is_registered
+licenses.is_activated: licenses.is_activated
+licenses.player_status: licenses.player_status
+licenses.pi_status: licenses.pi_status
+licenses.display_status: licenses.display_status
+licenses.install_date: licenses.install_date
+licenses.date_created: licenses.date_created
+licenses.date_updated: licenses.date_updated

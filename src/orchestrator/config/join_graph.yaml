@@ -1,0 +1,3 @@
+licenses: [dealers]
+hosts: [dealers]
+dealers: [licenses, hosts]

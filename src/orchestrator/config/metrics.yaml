@@ -1,0 +1,38 @@
+# Counts
+hosts.count:
+  expression: "COUNT(hosts.host_id)"
+  description: "Number of hosts"
+
+dealers.count:
+  expression: "COUNT(dealers.dealer_id)"
+  description: "Number of dealers"
+
+licenses.count:
+  expression: "COUNT(licenses.license_id)"
+  description: "Number of licenses"
+
+# License health
+licenses.registered.count:
+  expression: "SUM(CASE WHEN licenses.is_registered = 1 THEN 1 ELSE 0 END)"
+  description: "Registered licenses"
+
+licenses.activated.count:
+  expression: "SUM(CASE WHEN licenses.is_activated = 1 THEN 1 ELSE 0 END)"
+  description: "Activated licenses"
+
+licenses.activation_rate:
+  expression: "CASE WHEN COUNT(licenses.license_id)=0 THEN 0 ELSE SUM(CASE WHEN licenses.is_activated=1 THEN 1 ELSE 0 END) / COUNT(licenses.license_id) END"
+  description: "Activation rate (activated / licenses.count)"
+
+# Useful extras
+hosts.with_programmatic_id.count:
+  expression: "COUNT(hosts.programmatic_id)"
+  description: "Hosts with non-null programmatic_id"
+
+hosts.unique_cities:
+  expression: "COUNT(DISTINCT hosts.city)"
+  description: "Distinct cities with hosts"
+
+dealers.unique_regions:
+  expression: "COUNT(DISTINCT dealers.region)"
+  description: "Distinct dealer regions"

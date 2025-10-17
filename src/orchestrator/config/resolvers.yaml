@@ -1,0 +1,16 @@
+# src/orchestrator/config/resolvers.yaml
+licenses.dealer_id:
+  via_table: dealers
+  return_column: dealers.dealer_id
+  match:
+    field: dealers.dealer_name
+    mode: ilike_contains
+    escape: "\\"
+
+hosts.dealer_id:
+  via_table: dealers
+  return_column: dealers.dealer_id
+  match:
+    field: dealers.dealer_name
+    mode: ilike_contains
+    escape: "\\"
