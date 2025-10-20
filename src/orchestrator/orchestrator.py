@@ -1,129 +1,87 @@
 # src/orchestrator/orchestrator.py
 from __future__ import annotations
 
-from pathlib import Path
+import os
+
 from typing import Any, Dict, Optional
 
 from .config_loader import load_config
-from .errors import OrchestratorError, ErrorCode
-from .models import LogicalQueryRequest
-from .policy_gate import enforce_policies
-from .router_rules import route as route_rules
 from .sql_ast_builder import build_select_sql
+from .policy_gate import enforce_policies
+from .errors import OrchestratorError, ErrorCode
+from .models import LogicalQueryRequest  # <-- build a model, not a dict
 
-
-# Resolve the default config directory relative to this file, not CWD
-_DEFAULT_CONFIG_DIR = Path(__file__).resolve().parent / "config"
+# Routers
+from .router_runtime import route as route_runtime
+from .router_rules import route as route_rules  # safety fallback
+# Optional AI router (stub unless you implement it)
+try:
+    from .router_ai import translate as route_ai  # type: ignore
+except Exception:
+    route_ai = None
 
 
 def orchestrate(
-    nl_input: str,
+    nl_text: str,
     *,
     dialect: Optional[str] = None,
     tz: str = "Asia/Manila",
-    locale: Optional[str] = None,
-    tenant: Optional[str] = None,
-    config_path: Optional[str] = None,
-    include_trace: bool = True,
-    default_limit: int = 100,
+    include_trace: bool = False,
+    config_dir: str = "src/orchestrator/config",
+    ai_fallback: bool = True,
 ) -> Dict[str, Any]:
     """
-    Deterministic pipeline:
-      NL -> LogicalQueryRequest (router) -> AST SQL (sqlglot) -> Policy Gate
-      -> {"query": "..."} | {"error": "[CODE] ..."}
+    NL → LQR → AST → SQL (+ policy). Deterministic runtime router first; AI router optional; rules router fallback.
+    Returns either {"query": "<SELECT …>"} or {"error": "[CODE] …"}.
     """
-    trace: Dict[str, Any] = {"pipeline": {}, "ctx": {"tz": tz, "dialect": dialect}}
-
-    # -------- Stage 0: Load config (fail fast by design) --------
     try:
-        cfg_dir = Path(config_path) if config_path else _DEFAULT_CONFIG_DIR
-        config = load_config(str(cfg_dir))
-        trace["pipeline"]["config"] = "ok"
+        cfg = load_config(config_dir)
     except SystemExit as e:
-        msg = str(e).strip()
-        payload = {"error": f"[{ErrorCode.SCHEMA_MISSING.value}] {msg}"}
-        if include_trace:
-            payload["trace"] = {**trace, "stage": "config"}
-        return payload
-    except Exception as e:
-        payload = {"error": f"[{ErrorCode.UNSUPPORTED_OPERATION.value}] Config load error: {e}"}
-        if include_trace:
-            payload["trace"] = {**trace, "stage": "config"}
-        return payload
+        return {"error": f"[SCHEMA_MISSING] {e}"}
 
-    # -------- Stage 1: Route NL -> LQR --------
+    traces: Dict[str, Any] = {}
+
+    # 1) Runtime router (tokenizer + boundaries)
+    r = route_runtime(nl_text, cfg, tz=tz)
+    if "error" in r:
+        traces["runtime"] = r.get("trace")
+        # 2) AI fallback (optional)
+        if ai_fallback and route_ai is not None:
+            provider = os.getenv("ROUTER_PROVIDER", "openai")
+            ar = route_ai(nl_text, cfg, tz=tz, provider=provider)  # <-- pass provider
+            if "lqr" in ar:
+                r = ar
+            else:
+                traces["ai"] = ar.get("trace")
+        # 3) Legacy rules router as last resort
+        if "error" in r:
+            rr = route_rules(nl_text, cfg, tz=tz)
+            if "lqr" in rr:
+                r = rr
+            else:
+                traces["rules"] = rr.get("trace")
+                return {
+                    "error": rr.get("error", r.get("error", "[AMBIGUOUS_REQUEST] Unable to route")),
+                    "stage": "router",
+                    "trace": traces if include_trace else None,
+                }
+
     try:
-        routed = route_rules(nl_input or "", config, tz=tz)
-        trace["pipeline"]["router"] = routed.get("trace", {"router": "rules"})
-        if "error" in routed:
-            payload = {"error": routed["error"]}
-            if include_trace:
-                payload["trace"] = {**trace, "stage": "router"}
-            return payload
-        lqr_dict = routed.get("lqr") or {}
-        lqr = LogicalQueryRequest(**lqr_dict)
+        lqr_payload = r["lqr"]
+        lqr = lqr_payload if hasattr(lqr_payload, "metrics") else LogicalQueryRequest(**lqr_payload)
+        sql = build_select_sql(lqr, cfg, dialect=dialect)
+
+        # Support either enforce_policies(sql, cfg) or enforce_policies(sql)
+        try:
+            safe_sql = enforce_policies(sql, cfg)  # older signature
+        except TypeError:
+            safe_sql = enforce_policies(sql)       # current signature
+
+        out: Dict[str, Any] = {"query": safe_sql}
+        if include_trace:
+            out["trace"] = {**traces, "router": r.get("trace")}
+        return out
     except OrchestratorError as e:
-        payload = e.to_public_json()
-        if include_trace:
-            payload["trace"] = {**trace, "stage": "router"}
-        return payload
+        return {"error": f"[{e.code}] {e}", "stage": "policy"}
     except Exception as e:
-        payload = {"error": f"[{ErrorCode.UNSUPPORTED_OPERATION.value}] Router error: {e}"}
-        if include_trace:
-            payload["trace"] = {**trace, "stage": "router"}
-        return payload
-
-    # -------- Stage 2: Build AST SQL --------
-    try:
-        sql = build_select_sql(lqr, config, dialect=dialect)
-        trace["pipeline"]["ast"] = "ok"
-    except OrchestratorError as e:
-        payload = e.to_public_json()
-        if include_trace:
-            payload["trace"] = {**trace, "stage": "ast", "lqr": lqr.model_dump()}
-        return payload
-    except Exception as e:
-        payload = {"error": f"[{ErrorCode.UNSUPPORTED_OPERATION.value}] AST build error: {e}"}
-        if include_trace:
-            payload["trace"] = {**trace, "stage": "ast", "lqr": lqr.model_dump()}
-        return payload
-
-    # -------- Stage 3: Policy Gate --------
-    try:
-        final_sql = enforce_policies(
-            sql,
-            forbidden=getattr(config, "forbidden", []) or [],
-            default_limit=default_limit,
-            dialect=dialect,
-        )
-        trace["pipeline"]["policy"] = "ok"
-    except OrchestratorError as e:
-        payload = e.to_public_json()
-        if include_trace:
-            payload["trace"] = {**trace, "stage": "policy", "sql_pre_policy": sql}
-        return payload
-    except Exception as e:
-        payload = {"error": f"[{ErrorCode.UNSUPPORTED_OPERATION.value}] Policy error: {e}"}
-        if include_trace:
-            payload["trace"] = {**trace, "stage": "policy", "sql_pre_policy": sql}
-        return payload
-
-    # -------- Success --------
-    result = {"query": final_sql}
-    if include_trace:
-        result["trace"] = trace
-    return result
-
-
-# Optional convenience alias
-compile_query = orchestrate
-
-
-if __name__ == "__main__":
-    import sys
-    question = " ".join(sys.argv[1:]) if len(sys.argv) > 1 else "top 5 licenses.count by licenses.dealer_id in October 2025"
-    out = orchestrate(question, dialect=None, tz="Asia/Manila", include_trace=True)
-    if "query" in out:
-        print(out["query"])
-    else:
-        print(out["error"])
+        return {"error": f"[UNSUPPORTED_OPERATION] AST build error: {e}", "stage": "ast"}

@@ -1,61 +1,35 @@
 # src/orchestrator/config_loader.py
 from __future__ import annotations
 
-import json
-from pathlib import Path
+import os
 from typing import Any, Dict, List, Optional
 
 import yaml
-from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
-
-from .models import ResolutionMode
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
-# ===========================
-# Pydantic config models
-# ===========================
+# =========================
+# Pydantic config specs
+# =========================
 
-class MetricDef(BaseModel):
+class MetricSpec(BaseModel):
     expression: str
-
-    model_config = ConfigDict(str_strip_whitespace=True)
-
-    @field_validator("expression")
-    @classmethod
-    def expr_nonempty(cls, v: str) -> str:
-        if not isinstance(v, str) or not v.strip():
-            raise ValueError("metric.expression must be a non-empty string")
-        return v.strip()
 
 
 class Synonyms(BaseModel):
     metrics: Dict[str, List[str]] = Field(default_factory=dict)
     dimensions: Dict[str, List[str]] = Field(default_factory=dict)
-    operators: Dict[str, List[str]] = Field(default_factory=dict)
 
 
-class ResolverMatch(BaseModel):
-    field: str = Field(..., description="Fully-qualified name field (e.g., dealers.dealer_name)")
-    mode: Optional[ResolutionMode] = Field(default=None, description="ilike_contains | ilike_prefix | exact")
-    escape: Optional[str] = Field(default="\\", description="LIKE escape character, default '\\'")
-
-    model_config = ConfigDict(str_strip_whitespace=True)
-
-    @field_validator("field")
-    @classmethod
-    def fq_field(cls, v: str) -> str:
-        v = (v or "").strip()
-        if "." not in v:
-            raise ValueError("match.field must be 'table.column'")
-        return v
+class PatternsConfig(BaseModel):
+    shapes: Dict[str, Any] = Field(default_factory=dict)
 
 
 class ResolverSpec(BaseModel):
     """
-    Declarative resolver used by AST to compile single-statement name->id filters.
-    Keyed by target_fk in the config bundle, e.g.:
+    Declarative name→id resolver for a base-table FK.
 
-    resolvers:
+    Example YAML (either flat or nested under `resolvers:`):
       licenses.dealer_id:
         via_table: dealers
         return_column: dealers.dealer_id
@@ -64,199 +38,178 @@ class ResolverSpec(BaseModel):
           mode: ilike_contains
           escape: "\\"
     """
-    via_table: str = Field(..., description="Lookup table to search (must be in join_graph relative to base table)")
-    return_column: str = Field(..., description="Fully-qualified column returned by the lookup (e.g., dealers.dealer_id)")
-    match: ResolverMatch
+    via_table: str
+    return_column: str  # dotted: table.column
+    match: Dict[str, Any]  # requires "field" (dotted); optional "mode", "escape"
 
-    model_config = ConfigDict(str_strip_whitespace=True)
-
-    @field_validator("via_table")
-    @classmethod
-    def nonempty_table(cls, v: str) -> str:
-        v = (v or "").strip()
-        if not v:
-            raise ValueError("via_table must be a non-empty string")
-        return v
-
-    @field_validator("return_column")
-    @classmethod
-    def fq_return_column(cls, v: str) -> str:
-        v = (v or "").strip()
-        if "." not in v:
-            raise ValueError("return_column must be 'table.column'")
-        return v
+    @model_validator(mode="after")
+    def _validate(self) -> "ResolverSpec":
+        if "." not in self.return_column:
+            raise ValueError("return_column must be table.column")
+        mf = self.match.get("field")
+        if not mf or "." not in mf:
+            raise ValueError("match.field must be table.column")
+        return self
 
 
-class PatternsConfig(BaseModel):
+class LookupProjectionSpec(BaseModel):
     """
-    Generic holder for router shapes. We don't validate structure here to keep
-    it data-driven; the router will validate presence/semantics of fields it uses.
+    Safe lookup projection that requires a deterministic LEFT JOIN.
     """
-    shapes: Dict[str, Any] = Field(default_factory=dict)
+    via_table: str                 # table to join
+    select: str                    # dotted: table.column to project
+    join_on: List[str]             # ["licenses.dealer_id = dealers.dealer_id", ...]
+
+    @model_validator(mode="after")
+    def _validate(self) -> "LookupProjectionSpec":
+        if "." not in self.select:
+            raise ValueError("select must be table.column")
+        if not self.join_on:
+            raise ValueError("join_on cannot be empty")
+        for j in self.join_on:
+            if "=" not in j:
+                raise ValueError(f"join_on clause must contain '=': {j}")
+            left, right = [p.strip() for p in j.split("=", 1)]
+            if "." not in left or "." not in right:
+                raise ValueError(f"join_on sides must be table.column: {j}")
+        return self
 
 
 class ConfigBundle(BaseModel):
-    """
-    Source-of-truth configuration loaded from YAML files.
-    Most fields are optional so the loader can run with partial configs during development.
-    """
-    # Core
-    entities: Dict[str, Any] = Field(default_factory=dict)
+    entities: Dict[str, str] = Field(default_factory=dict)
     fields: Dict[str, str] = Field(default_factory=dict)
     dimensions: Dict[str, str] = Field(default_factory=dict)
-    metrics: Dict[str, MetricDef] = Field(default_factory=dict)
-
-    # Joins and safety
+    metrics: Dict[str, MetricSpec] = Field(default_factory=dict)
     join_graph: Dict[str, List[str]] = Field(default_factory=dict)
-    forbidden: List[str] = Field(default_factory=list)
 
-    # Optional, data-driven router helpers
     synonyms: Optional[Synonyms] = None
-    resolvers: Dict[str, ResolverSpec] = Field(default_factory=dict)
     patterns: Optional[PatternsConfig] = None
 
-    model_config = ConfigDict(str_strip_whitespace=True)
+    # Maps like {"licenses.dealer_id": ResolverSpec(...), ...}
+    resolvers: Dict[str, ResolverSpec] = Field(default_factory=dict)
 
-    # --------- Validators (Pydantic v2) ---------
+    # Maps like {"licenses.host_name": LookupProjectionSpec(...), ...}
+    lookup_projections: Dict[str, LookupProjectionSpec] = Field(default_factory=dict)
 
-    @field_validator("fields", "dimensions")
+    @field_validator("metrics", mode="before")
     @classmethod
-    def validate_mappings_are_fq(cls, mapping: Dict[str, str]) -> Dict[str, str]:
-        """
-        Ensure all field/dimension mappings are 'table.column'.
-        """
-        out: Dict[str, str] = {}
-        for k, v in (mapping or {}).items():
-            k_s = str(k).strip()
-            v_s = str(v).strip()
-            if "." not in v_s:
-                raise ValueError(f"Mapping for '{k_s}' must be 'table.column', got '{v_s}'")
-            out[k_s] = v_s
-        return out
-
-    @field_validator("metrics")
-    @classmethod
-    def ensure_metric_defs(cls, mdefs: Dict[str, MetricDef]) -> Dict[str, MetricDef]:
-        """
-        Normalize metric keys to str (strip) and keep MetricDef objects.
-        """
-        out: Dict[str, MetricDef] = {}
-        for k, v in (mdefs or {}).items():
-            if isinstance(v, dict):
-                v = MetricDef(**v)
-            if not isinstance(v, MetricDef):
-                raise ValueError(f"Invalid metric entry for '{k}': expected dict or MetricDef")
-            out[str(k).strip()] = v
-        return out
-
-    @field_validator("join_graph")
-    @classmethod
-    def normalize_join_graph(cls, g: Dict[str, Any]) -> Dict[str, List[str]]:
+    def _metrics_coerce(cls, v):
         """
         Accept either:
-          table: [neighbor1, neighbor2]
-        or
-          table: { neighbor1: "id=id", neighbor2: "..." }   (we ignore expressions in Phase 1)
-        We only keep the neighbor names (deterministic paths are enforced elsewhere).
+          metrics:
+            licenses.count: { expression: "COUNT(...)" }
+        or:
+          metrics:
+            licenses.count: "COUNT(...)"
         """
-        out: Dict[str, List[str]] = {}
-        for t, neighbors in (g or {}).items():
-            t_s = str(t).strip()
-            if isinstance(neighbors, dict):
-                out[t_s] = sorted([str(n).strip() for n in neighbors.keys()])
-            elif isinstance(neighbors, list):
-                out[t_s] = sorted([str(n).strip() for n in neighbors])
+        v = v or {}
+        out = {}
+        for k, val in v.items():
+            if isinstance(val, dict):
+                out[k] = val
             else:
-                raise ValueError(f"join_graph entry for '{t_s}' must be list or dict")
+                out[k] = {"expression": str(val)}
         return out
 
+    @field_validator("dimensions", "fields", mode="before")
+    @classmethod
+    def _coerce_flat_maps(cls, v):
+        return v or {}
 
-# ===========================
-# Loader
-# ===========================
+    @field_validator("join_graph", mode="before")
+    @classmethod
+    def _coerce_join_graph(cls, v):
+        return v or {}
 
-_YAML_FILES = {
-    "entities": "entities.yaml",
-    "fields": "fields.yaml",
-    "dimensions": "dimensions.yaml",
-    "metrics": "metrics.yaml",
-    "join_graph": "join_graph.yaml",
-    "forbidden": "forbidden.yaml",
-    # Optional router helpers:
-    "synonyms": "synonyms.yaml",
-    "resolvers": "resolvers.yaml",
-    "patterns": "patterns.yaml",
-}
+    @field_validator("resolvers", mode="before")
+    @classmethod
+    def _normalize_resolvers(cls, v):
+        """
+        Accept either:
+          { resolvers: { <fk>: {...} } }   # nested
+        or:
+          { <fk>: {...} }                  # flat
+        """
+        if not v:
+            return {}
+        if isinstance(v, dict) and "resolvers" in v and isinstance(v["resolvers"], dict):
+            return v["resolvers"]
+        return v
+
+    @field_validator("lookup_projections", mode="before")
+    @classmethod
+    def _normalize_lookup_projections(cls, v):
+        """
+        Accept either:
+          { projections: { <alias>: {...} } }   # nested
+        or:
+          { <alias>: {...} }                    # flat
+        """
+        if not v:
+            return {}
+        if isinstance(v, dict) and "projections" in v and isinstance(v["projections"], dict):
+            return v["projections"]
+        return v
 
 
-def _load_yaml(path: Path) -> Any:
-    with path.open("r", encoding="utf-8") as f:
-        return yaml.safe_load(f) or {}
+# =========================
+# YAML helpers
+# =========================
 
+def _load_yaml(path: str) -> Dict[str, Any]:
+    if not os.path.exists(path):
+        return {}
+    with open(path, "r", encoding="utf-8") as f:
+        data = yaml.safe_load(f)
+        return data or {}
+
+
+# =========================
+# Public loader
+# =========================
 
 def load_config(config_dir: str) -> ConfigBundle:
     """
-    Load all config from the provided directory, validating with Pydantic.
-
-    Required (for non-trivial operation):
-      - fields.yaml
-      - dimensions.yaml
-      - metrics.yaml
-
-    Optional:
-      - entities.yaml
-      - join_graph.yaml
-      - forbidden.yaml
-      - synonyms.yaml
-      - resolvers.yaml
-      - patterns.yaml
-
-    On validation error we raise SystemExit with a descriptive message (keeps current orchestrator behavior).
+    Load all YAML configuration into a validated ConfigBundle.
+    Robust to flat vs nested styles for resolvers and lookup_projections.
     """
-    base = Path(config_dir).resolve()
-    if not base.exists() or not base.is_dir():
-        raise SystemExit(f"Config directory not found: {base}")
+    entities = _load_yaml(os.path.join(config_dir, "entities.yaml"))
+    fields = _load_yaml(os.path.join(config_dir, "fields.yaml"))
+    dimensions = _load_yaml(os.path.join(config_dir, "dimensions.yaml"))
+    metrics = _load_yaml(os.path.join(config_dir, "metrics.yaml"))
+    join_graph = _load_yaml(os.path.join(config_dir, "join_graph.yaml"))
 
-    raw: Dict[str, Any] = {}
+    synonyms_raw = _load_yaml(os.path.join(config_dir, "synonyms.yaml"))
+    patterns_raw = _load_yaml(os.path.join(config_dir, "patterns.yaml"))
 
-    # Load present files; missing optional files are fine.
-    for key, fname in _YAML_FILES.items():
-        p = base / fname
-        if not p.exists():
-            continue
-        try:
-            raw[key] = _load_yaml(p)
-        except Exception as e:
-            raise SystemExit(f"Failed to parse {fname}: {e}")
+    resolvers_raw = _load_yaml(os.path.join(config_dir, "resolvers.yaml"))
+    lookup_proj_raw = _load_yaml(os.path.join(config_dir, "lookup_projections.yaml"))
 
-    # Coerce models for optional helpers
-    if "synonyms" in raw and raw["synonyms"] is not None:
-        try:
-            raw["synonyms"] = Synonyms(**raw["synonyms"])
-        except Exception as e:
-            raise SystemExit(f"Invalid synonyms.yaml: {e}")
+    # Build bundle with Pydantic coercion/validation
+    cfg = ConfigBundle(
+        entities=entities or {},
+        fields=fields or {},
+        dimensions=dimensions or {},
+        metrics=metrics or {},
+        join_graph=join_graph or {},
+        synonyms=Synonyms(**(synonyms_raw or {})) if synonyms_raw else None,
+        patterns=PatternsConfig(**(patterns_raw or {})) if patterns_raw else None,
+        resolvers=(resolvers_raw or {}),
+        lookup_projections=(lookup_proj_raw or {}),
+    )
 
-    if "patterns" in raw and raw["patterns"] is not None:
-        try:
-            raw["patterns"] = PatternsConfig(**raw["patterns"])
-        except Exception as e:
-            raise SystemExit(f"Invalid patterns.yaml: {e}")
+    # Explicitly ensure dict[str, ResolverSpec] typing (safer than relying on model coercion only)
+    if cfg.resolvers:
+        cfg.resolvers = {k: (v if isinstance(v, ResolverSpec) else ResolverSpec(**v))
+                         for k, v in cfg.resolvers.items()}
 
-    if "resolvers" in raw and raw["resolvers"] is not None:
-        try:
-            # keep dict[str, ResolverSpec]
-            raw["resolvers"] = {str(k): ResolverSpec(**v) for k, v in raw["resolvers"].items()}
-        except Exception as e:
-            raise SystemExit(f"Invalid resolvers.yaml: {e}")
+    if cfg.lookup_projections:
+        cfg.lookup_projections = {k: (v if isinstance(v, LookupProjectionSpec) else LookupProjectionSpec(**v))
+                                  for k, v in cfg.lookup_projections.items()}
 
-    try:
-        bundle = ConfigBundle(**raw)
-    except Exception as e:
-        # Pretty-print nested validation errors
-        try:
-            msg = json.loads(e.json())
-        except Exception:
-            msg = str(e)
-        raise SystemExit(f"Config validation error: {msg}")
+    # Metrics already coerced by the field_validator above
+    if cfg.metrics:
+        cfg.metrics = {k: (v if isinstance(v, MetricSpec) else MetricSpec(**v))
+                       for k, v in cfg.metrics.items()}
 
-    return bundle
+    return cfg

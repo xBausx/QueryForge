@@ -2,14 +2,21 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Literal
 
 from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 
+MatchMode = Literal["ilike_contains", "ilike_prefix", "exact"]
 
 # -----------------------------
 # Enums
 # -----------------------------
+
+class Resolution(BaseModel):
+    target_fk: str                 # e.g. "licenses.dealer_id"
+    value: str                     # user text (will be escaped safely)
+    mode: Optional[MatchMode] = None
+
 
 class Operator(str, Enum):
     """Supported filter operators (string values match what the AST expects)."""
@@ -133,7 +140,9 @@ class LogicalQueryRequest(BaseModel):
     resolutions: List[Resolution] = Field(default_factory=list)
 
     model_config = ConfigDict(str_strip_whitespace=True)
-
+    
+    projections: List[str] = Field(default_factory=list)
+    
     @field_validator("metrics")
     @classmethod
     def at_least_one_metric(cls, v: List[str]) -> List[str]:
@@ -168,6 +177,19 @@ class LogicalQueryRequest(BaseModel):
         end = self.time_range.get("end")
         if not start or not end or not isinstance(start, str) or not isinstance(end, str):
             raise ValueError("time_range requires string 'start' and 'end' keys")
+        return self
+    @model_validator(mode="after")
+    def require_metrics_or_projections(self) -> "LogicalQueryRequest":
+        has_metrics = bool(self.metrics)
+        has_proj = bool(self.projections)
+        if not has_metrics and not has_proj:
+            raise ValueError("Either metrics or projections must be provided")
+        # Disallow mixing aggregates with raw projections in Phase 1
+        if has_metrics and has_proj:
+            raise ValueError("Cannot mix metrics and projections in a single query (Phase 1)")
+        # Reasonable default LIMIT
+        if self.limit is None:
+            self.limit = 100
         return self
 
 

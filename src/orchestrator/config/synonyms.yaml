@@ -1,0 +1,19 @@
+metrics:
+  licenses.count: ["licenses","license count","total licenses"]
+  hosts.count:    ["hosts","host count","total hosts"]
+
+dimensions:
+  licenses.dealer_id:   ["dealer id","dealer"]
+  licenses.dealer_name: ["dealer name","dealer"]
+  hosts.state:          ["state","host state"]
+
+operators:
+  like: ["contains","like","matches"]
+  in:   ["in","within"]
+  between: ["between","from ... to"]
+  eq: ["is","="]
+  neq: ["is not","!=","<>"]
+
+states:
+  TX: ["texas","tx"]
+  FL: ["florida","fl"]

@@ -23,22 +23,29 @@ def enforce_policies(
     Policies enforced:
       1) Strip comments; first token must be SELECT (no CTE/DDL/DML/multi-statement).
       2) No forbidden fields/patterns (simple case-insensitive substring match).
-      3) LIMIT is required; inject default LIMIT if none present.
-      4) Re-parse to verify the statement is a single SELECT and serialize canonically.
+      3) Ensure all LIKE/ILIKE have ESCAPE '\\' (inject if absent).
+      4) LIMIT is required; inject default LIMIT if none present.
+      5) Re-parse and serialize canonically.
     """
     if not isinstance(sql, str) or not sql.strip():
         raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, "Empty SQL provided to policy gate")
 
+    # 1) Block comments outright, then strip to normalize
+    if "--" in sql or "/*" in sql or "*/" in sql:
+        raise OrchestratorError(
+            ErrorCode.UNSUPPORTED_OPERATION,
+            "Comments are not allowed in generated SQL",
+        )
     stripped = _strip_comments(sql).lstrip()
 
-    # 1) SELECT-first guard
+    # Must start with SELECT (not WITH/INSERT/UPDATE/etc.)
     if not stripped[:6].upper().startswith("SELECT"):
         raise OrchestratorError(
             ErrorCode.UNSUPPORTED_OPERATION,
-            "Only SELECT statements are allowed (first token must be SELECT)"
+            "Only SELECT statements are allowed (first token must be SELECT)",
         )
 
-    # 2) Parse and verify single-statement SELECT (no UNION/CTE/DDL)
+    # Parse; must be exactly one statement; normalize to a Select node
     try:
         stmts = sqlglot.parse(stripped)
     except Exception as e:
@@ -46,7 +53,6 @@ def enforce_policies(
 
     if not stmts:
         raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, "No parseable statement found")
-
     if len(stmts) != 1:
         raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, "Multiple statements are not allowed")
 
@@ -61,22 +67,35 @@ def enforce_policies(
             raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, "Statement must be a SELECT")
         node = inner  # normalize
 
-    # 3) Forbidden pattern scan (on the canonicalized SQL)
-    canonical_sql = node.sql(dialect=dialect)
+    # 2) (we'll compute canonical SQL after mutations) — Forbidden pattern scan happens later
+
+    # 3) Ensure LIKE/ILIKE all have ESCAPE '\\'
+    #    (do not alter the pattern; just attach ESCAPE if it's missing)
+    for like_node in list(node.find_all(exp.Like)):
+        if like_node.args.get("escape") is None:
+            like_node.set("escape", exp.Literal.string("\\"))
+
+    ILike = getattr(exp, "ILike", None)
+    if ILike is not None:
+        for ilike_node in list(node.find_all(ILike)):
+            if ilike_node.args.get("escape") is None:
+                ilike_node.set("escape", exp.Literal.string("\\"))
+
+    # 4) Inject default LIMIT if absent
+    if not _has_limit(node):
+        node.set("limit", exp.Limit(expression=exp.Literal.number(int(default_limit))))
+
+    # Canonicalize and check forbidden patterns on the final string
+    canonical_sql = node.sql(dialect=dialect).strip()
     if forbidden:
         hit = _find_forbidden(canonical_sql, forbidden)
         if hit:
             raise OrchestratorError(
                 ErrorCode.FORBIDDEN_FIELD,
-                f"Use of forbidden field/pattern detected: '{hit}'"
+                f"Use of forbidden field/pattern detected: '{hit}'",
             )
 
-    # 4) Ensure LIMIT exists, inject if absent (use correct keyword 'expression')
-    if not _has_limit(node):
-        node.set("limit", exp.Limit(expression=exp.Literal.number(int(default_limit))))
-
-    # Re-serialize canonically
-    return node.sql(dialect=dialect).strip()
+    return canonical_sql
 
 
 # ---------------------------

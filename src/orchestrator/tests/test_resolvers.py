@@ -51,3 +51,60 @@ def test_resolution_hosts_by_dealer_name_group_by_state():
     assert "dealer_name" in sql and "%orion%" in sql
     # default LIMIT injected
     assert " limit 100" in sql
+
+def test_resolver_prefers_exists_over_join_in_aggregate():
+    """
+    Aggregate query with a dealer name should resolve via EXISTS(...)
+    and should NOT introduce a JOIN to dealers in Phase 1.
+    """
+    nl = "licenses.count for dealer nebula"
+    out = orchestrate(nl, include_trace=False)
+    assert "query" in out, out.get("error", "no error")
+    sql = _norm(out["query"])
+
+    assert " from licenses " in sql
+    assert " exists (" in sql and " from dealers " in sql
+    # Ensure we didn't turn the resolver into a JOIN for aggregates
+    assert " join dealers " not in sql
+    # LIKE/ILIKE with ESCAPE '\\'
+    assert (" ilike " in sql) or (" like " in sql and "lower(" in sql)
+    assert " escape '\\'" in sql
+    assert " limit 100" in sql
+
+
+def test_resolver_escapes_percent_and_underscore():
+    """
+    Resolver must escape wildcard characters in the user input so they are
+    treated literally in LIKE. Expect '\%' and '\_' inside the quoted pattern
+    plus ESCAPE '\\'.
+    """
+    nl = "licenses.count for dealer 100%_power"
+    out = orchestrate(nl, include_trace=False)
+    assert "query" in out, out.get("error", "no error")
+    sql = _norm(out["query"])
+
+    assert " from licenses " in sql
+    assert " exists (" in sql and " from dealers " in sql
+    # Pattern should contain escaped percent and underscore
+    assert "100\\%_power" in sql or "100\\%\\_power" in sql
+    # And the ESCAPE clause must be present
+    assert " escape '\\'" in sql
+    assert " limit 100" in sql
+
+
+def test_hosts_resolver_exists_without_join_in_aggregate():
+    """
+    Hosts aggregate: use hosts.dealer_id -> dealers resolver via EXISTS.
+    No JOIN to dealers should be introduced in Phase 1 aggregates.
+    """
+    nl = "hosts.count for dealer orion"
+    out = orchestrate(nl, include_trace=False)
+    assert "query" in out, out.get("error", "no error")
+    sql = _norm(out["query"])
+
+    assert " from hosts " in sql
+    assert " exists (" in sql and " from dealers " in sql
+    assert " join dealers " not in sql
+    assert (" ilike " in sql) or (" like " in sql and "lower(" in sql)
+    assert " escape '\\'" in sql
+    assert " limit 100" in sql

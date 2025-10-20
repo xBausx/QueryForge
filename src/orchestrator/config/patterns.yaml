@@ -1,0 +1,30 @@
+shapes:
+  ranked_group:
+    signals:
+      rank: ["top","bottom","best","most","fewest","lowest","highest"]
+    required:
+      one_of: ["metric","entity"]
+      dimension: true
+    optional:
+      value_after_dimension: true
+      time: true
+    order_by: "first_metric"
+    limit_from_rank: true
+
+  group_only:
+    required:
+      one_of: ["metric","entity"]
+      dimension: true
+    optional:
+      time: true
+
+  metric_only:
+    required:
+      one_of: ["metric","entity"]
+    optional:
+      time: true
+
+  detail_window:
+    required:
+      entity: true
+      between: true

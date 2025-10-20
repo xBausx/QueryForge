@@ -1,0 +1,13 @@
+# lookup_projections.yaml
+projections:
+  licenses.host_name:
+    via_table: hosts
+    select: hosts.host_name
+    join_on:
+      - licenses.host_id = hosts.host_id
+
+  licenses.business_hours:
+    via_table: dealers
+    select: dealers.business_hours
+    join_on:
+      - licenses.dealer_id = dealers.dealer_id

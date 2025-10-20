@@ -1,19 +1,98 @@
 # src/orchestrator/sql_ast_builder.py
 from __future__ import annotations
 
-from typing import Any, Dict, Iterable, List, Optional, Set, Tuple
+from typing import Any, Dict, List, Optional, Set
 
 import sqlglot
 from sqlglot import exp
 from sqlglot.expressions import Expression
 
 from .errors import OrchestratorError, ErrorCode
-from .models import Filter, LogicalQueryRequest, OrderBy, ResolutionMode
+from .models import LogicalQueryRequest
 
 
-# =========================
-# Public API
-# =========================
+# -----------------------
+# Small helpers
+# -----------------------
+
+def _table_part(dotted: str) -> str:
+    return dotted.split(".", 1)[0]
+
+
+def _col_part(dotted: str) -> str:
+    return dotted.split(".", 1)[1]
+
+
+def _col(dotted: str) -> exp.Column:
+    t, c = _table_part(dotted), _col_part(dotted)
+    return exp.column(c, table=t)
+
+
+def _get(o: Any, key: str, default: Any = None) -> Any:
+    """Access attribute or dict key uniformly."""
+    if isinstance(o, dict):
+        return o.get(key, default)
+    return getattr(o, key, default)
+
+
+def _compile_metric(expr_sql: str, alias: str) -> exp.Expression:
+    node = sqlglot.parse_one(expr_sql)
+    return node.as_(alias)
+
+
+def _lit(v: Any) -> Expression:
+    if isinstance(v, bool):
+        return exp.Boolean(this=v)
+    if isinstance(v, (int, float)):
+        return exp.Literal.number(v)
+    return exp.Literal.string(str(v))
+
+
+def _compile_filter(filt, field_map: Dict[str, str], dim_map: Dict[str, str]) -> Optional[Expression]:
+    field = _get(filt, "field")
+    op = _get(filt, "op")
+    value = _get(filt, "value")
+    dotted = dim_map.get(field) or field_map.get(field)
+    if not dotted:
+        return None
+    col = _col(dotted)
+
+    if op == "eq":
+        return exp.EQ(this=col, expression=_lit(value))
+    if op == "neq":
+        return exp.NEQ(this=col, expression=_lit(value))
+    if op == "gt":
+        return exp.GT(this=col, expression=_lit(value))
+    if op == "lt":
+        return exp.LT(this=col, expression=_lit(value))
+    if op == "gte":
+        return exp.GTE(this=col, expression=_lit(value))
+    if op == "lte":
+        return exp.LTE(this=col, expression=_lit(value))
+    if op == "between":
+        a, b = value[0], value[1]
+        return exp.Between(this=col, low=_lit(a), high=_lit(b))
+    if op == "in":
+        arr = value if isinstance(value, list) else [value]
+        return exp.In(this=col, expressions=[_lit(v) for v in arr])
+    if op == "like":
+        # Compare LOWER(col) LIKE LOWER('value'); policy gate adds ESCAPE '\\'
+        return exp.Like(this=exp.Lower(this=col), expression=exp.Lower(this=_lit(value)))
+    return None
+
+
+def _ensure_edge(join_graph: Dict[str, List[str]], a: str, b: str) -> None:
+    neigh = set((join_graph or {}).get(a, []))
+    if b not in neigh:
+        raise OrchestratorError(
+            ErrorCode.SCHEMA_MISMATCH,
+            f"Join from '{a}' to '{b}' is not permitted by join_graph."
+        )
+
+
+# -----------------------
+# Main compiler
+# -----------------------
 
 def build_select_sql(
     lqr: LogicalQueryRequest,
@@ -22,449 +101,224 @@ def build_select_sql(
     dialect: Optional[str] = None,
 ) -> str:
     """
-    Compile a LogicalQueryRequest into a safe SELECT SQL string using SQLGlot.
-
-    Phase 1 constraints:
-      - Single base table only for SELECT list and simple filters.
-      - No joins in FROM, no CTEs, no DDL/DML.
-      - Name->ID lookups are supported via declarative resolvers as EXISTS/IN subqueries.
-      - Filters supported for common ops. LIKE uses explicit ESCAPE '\\'.
+    Build SELECT SQL from a LogicalQueryRequest.
+    Supports:
+      - Aggregate mode (metrics/dimensions)
+      - Detail mode (projections) with safe lookup LEFT JOINs.
     """
-    # Validate presence of metric definitions
-    metric_defs = getattr(config, "metrics", {}) or {}
-    if not metric_defs:
-        raise OrchestratorError(ErrorCode.SCHEMA_MISSING, "No metrics configured")
-
-    field_map = getattr(config, "fields", {}) or {}
-    dim_map = getattr(config, "dimensions", {}) or {}
+    fields = getattr(config, "fields", {}) or {}
+    dims = getattr(config, "dimensions", {}) or {}
+    metrics_cfg = getattr(config, "metrics", {}) or {}
+    resolvers = getattr(config, "resolvers", {}) or {}
+    lookup_proj = getattr(config, "lookup_projections", {}) or {}
     join_graph = getattr(config, "join_graph", {}) or {}
-    resolver_cfg: Dict[str, Any] = getattr(config, "resolvers", {}) or {}
 
-    # 1) Build SELECT list: metrics (aliased to metric names) + dimensions
+    # ---------- Determine base table ----------
+    base_table: Optional[str] = None
+
+    if lqr.metrics:
+        # derive base table(s) from metric expressions
+        tables: Set[str] = set()
+        for m in lqr.metrics:
+            spec = metrics_cfg.get(m)
+            if not spec:
+                raise OrchestratorError(ErrorCode.SCHEMA_MISSING, f"Unknown metric '{m}'")
+            try:
+                expr_sql = spec.expression if hasattr(spec, "expression") else spec.get("expression")
+                node = sqlglot.parse_one(expr_sql)
+            except Exception as e:
+                raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, f"Metric '{m}' expression parse error: {e}")
+            for col in node.find_all(exp.Column):
+                if not col.table:
+                    raise OrchestratorError(
+                        ErrorCode.SCHEMA_MISSING,
+                        f"Metric '{m}' uses unqualified column '{col.name}'."
+                    )
+                tables.add(col.table)
+        if not tables:
+            raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, "Unable to derive base table from metrics.")
+        if len(tables) > 1:
+            raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, f"Multiple base tables in metrics: {sorted(tables)}")
+        base_table = next(iter(tables))
+    else:
+        # detail mode: infer base from first projection canonical name ("entity.field_alias")
+        if not lqr.projections:
+            raise OrchestratorError(ErrorCode.MISSING_PARAMETER, "No metrics or projections provided")
+        first = lqr.projections[0]
+        if "." not in first:
+            raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, "Projection names must be <entity>.<alias>")
+        base_table = _table_part(first)
+
+    # ---------- FROM ----------
     select_exprs: List[Expression] = []
-    used_tables: Set[str] = set()
-
-    # Metrics
-    metric_aliases: Set[str] = set()
-    for mname in lqr.metrics:
-        mdef = metric_defs.get(mname)
-        if not mdef:
-            raise OrchestratorError(ErrorCode.SCHEMA_MISSING, f"Unknown metric: {mname}")
-
-        try:
-            mexpr_inner = sqlglot.parse_one(_strip_alias(mdef.expression))
-        except Exception as e:
-            raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, f"Invalid metric expression for '{mname}': {e}")
-
-        mexpr = mexpr_inner.as_(mname)
-        select_exprs.append(mexpr)
-        used_tables.update(_tables_from_expression(mexpr))
-
-        if mname in metric_aliases:
-            raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, f"Duplicate metric alias: {mname}")
-        metric_aliases.add(mname)
-
-    # Dimensions
-    group_exprs: List[Expression] = []
-    dim_columns: Dict[str, Expression] = {}
-    for dname in lqr.dimensions:
-        col = _resolve_column(dname, field_map, dim_map)
-        dim_columns[dname] = col
-        select_exprs.append(col.as_(dname))
-        group_exprs.append(col)
-        
-        # Use canonical mapping to determine the table (more robust than AST inspection)
-        mapped = dim_map.get(dname) or field_map.get(dname)
-        if not mapped or "." not in mapped:
-            raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, f"Unknown or invalid mapping for dimension '{dname}'")
-        used_tables.add(_table_part(mapped))
-
-    # 2) Establish base table from metrics/dimensions FIRST (Phase-1 single-table)
-    base_table = _ensure_single_table(used_tables)
-
-    # 3) Time range → WHERE on a time dimension from the SAME base table
     where_expr: Optional[Expression] = None
-    if lqr.time_range:
-        time_field_name, time_col = _pick_time_dimension_for_table(base_table, lqr, dim_map)
-        if time_col is None:
-            candidates = _time_like_candidates(
-                [name for name, mapping in dim_map.items() if _table_part(mapping) == base_table]
-            )
-            raise OrchestratorError(
-                ErrorCode.MISSING_PARAMETER,
-                f"time_range specified but no time dimension found on base table '{base_table}'.",
-                meta={"suggest": {"time_dimensions": candidates, "base_table": base_table}}
-            )
-        start_lit = exp.Literal.string(lqr.time_range["start"])
-        end_lit = exp.Literal.string(lqr.time_range["end"])
-        where_expr = exp.and_(
-            exp.GTE(this=time_col.copy(), expression=start_lit),
-            exp.LT(this=time_col.copy(), expression=end_lit),
-        )
+    group_exprs: List[Expression] = []
 
-    # 4) Additional simple filters (Phase 1 supports common ops)
+    from_ = exp.Table(this=base_table)
+
+    # ---------- Aggregate mode ----------
+    if lqr.metrics:
+        # metrics
+        for m in lqr.metrics:
+            spec = metrics_cfg[m]
+            expr_sql = spec.expression if hasattr(spec, "expression") else spec.get("expression")
+            select_exprs.append(_compile_metric(expr_sql, m))
+
+        # dimensions
+        for d in lqr.dimensions or []:
+            dotted = dims.get(d) or fields.get(d)
+            if not dotted:
+                raise OrchestratorError(ErrorCode.SCHEMA_MISSING, f"Unknown dimension '{d}'")
+            if _table_part(dotted) != base_table:
+                raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, f"Dimension '{d}' not on base table '{base_table}'")
+            col = _col(dotted)
+            select_exprs.append(col.as_(d))
+            group_exprs.append(col)
+
+    # ---------- Detail mode (projections) ----------
+    else:
+        for pname in lqr.projections:
+            # same-table?
+            dotted = dims.get(pname) or fields.get(pname)
+            if dotted and _table_part(dotted) == base_table:
+                select_exprs.append(_col(dotted).as_(pname))
+                continue
+            # lookup?
+            spec = lookup_proj.get(pname)
+            if spec:
+                via = spec.via_table if hasattr(spec, "via_table") else spec.get("via_table")
+                _ensure_edge(join_graph, base_table, via)
+                sel = spec.select if hasattr(spec, "select") else spec.get("select")
+                select_exprs.append(_col(sel).as_(pname))
+                continue
+            raise OrchestratorError(ErrorCode.SCHEMA_MISSING, f"Unknown projection '{pname}'")
+
+    # ---------- Filters ----------
     for f in lqr.filters or []:
-        pred = _compile_filter(f, field_map, dim_map)
+        pred = _compile_filter(f, fields, dims)
         if pred is None:
-            raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, f"Unsupported filter operator: {f.op}")
-        # Derive the filter's table from canonical mapping (deterministic, avoids AST quirks)
-        mapped = dim_map.get(f.field) or field_map.get(f.field)
-        if not mapped or "." not in mapped:
-            raise OrchestratorError(
-                ErrorCode.SCHEMA_MISSING,
-                f"Unknown or invalid mapping for filter field '{f.field}'."
-            )
-        pred_table = _table_part(mapped)
-        
-        if pred_table != base_table:
+            raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, f"Unsupported filter: {_get(f,'field')} {_get(f,'op')}")
+        # table guard
+        mapped = dims.get(_get(f, "field")) or fields.get(_get(f, "field"))
+        if not mapped or _table_part(mapped) != base_table:
             raise OrchestratorError(
                 ErrorCode.SCHEMA_MISMATCH,
-                f"Filter field '{f.field}' belongs to table '{pred_table}', "
-                f"but base table is '{base_table}'. Joins are disabled in Phase 1."
+                f"Filter field '{_get(f,'field')}' not on base table '{base_table}' in Phase 1."
             )
-            
-        used_tables.add(pred_table)
-        
         where_expr = pred if where_expr is None else exp.and_(where_expr, pred)
 
-    # Ensure still single-table after filters
-    _ensure_single_table(used_tables)
+    # ---------- Time range ----------
+    if lqr.time_range:
+        start = lqr.time_range.get("start")
+        end = lqr.time_range.get("end")
+        date_candidates = [
+            f"{base_table}.date_created",
+            f"{base_table}.install_date",
+            f"{base_table}.created_at",
+        ]
+        chosen = next((d for d in date_candidates if d in fields.values() or d in dims.values()), date_candidates[0])
+        c = _col(chosen)
+        rng_pred = exp.and_(
+            exp.GTE(this=c, expression=exp.Literal.string(start)),
+            exp.LT(this=c, expression=exp.Literal.string(end)),
+        )
+        where_expr = rng_pred if where_expr is None else exp.and_(where_expr, rng_pred)
 
-    # 5) Resolver-based lookups (name -> id) compiled as EXISTS subqueries
-    for r in lqr.resolutions or []:
-        # target_fk must be a canonical mapping on the base table
-        fk_mapping = dim_map.get(r.target_fk) or field_map.get(r.target_fk)
-        if not fk_mapping or "." not in fk_mapping:
-            raise OrchestratorError(ErrorCode.SCHEMA_MISSING, f"Unknown target_fk in resolution: {r.target_fk}")
-        fk_table, fk_col = _split_table_column(fk_mapping)
-        if fk_table != base_table:
-            raise OrchestratorError(
-                ErrorCode.SCHEMA_MISMATCH,
-                f"Resolution target_fk '{r.target_fk}' is on table '{fk_table}', "
-                f"but base table is '{base_table}'."
+    # ---------- Resolutions -> EXISTS subqueries ----------
+    for res in lqr.resolutions or []:
+        target_fk = _get(res, "target_fk")
+        value = _get(res, "value")
+        mode = _get(res, "mode")  # may be None; fallback to config
+        if not target_fk:
+            raise OrchestratorError(ErrorCode.MISSING_PARAMETER, "Resolution missing target_fk")
+
+        rspec = resolvers.get(target_fk)
+        if not rspec:
+            raise OrchestratorError(ErrorCode.SCHEMA_MISSING, f"No resolver for '{target_fk}'")
+
+        via = rspec.via_table if hasattr(rspec, "via_table") else rspec.get("via_table")
+        return_col = rspec.return_column if hasattr(rspec, "return_column") else rspec.get("return_column")
+        match = rspec.match if hasattr(rspec, "match") else rspec.get("match", {})
+        match_field = match.get("field")
+        cfg_mode = match.get("mode")
+        # prefer LQR-specified mode if present; else config
+        mode = mode or cfg_mode or "ilike_contains"
+
+        _ensure_edge(join_graph, base_table, via)
+
+        # Build name predicate according to mode
+        val_str = str(value)
+        if mode == "exact":
+            name_pred = exp.EQ(
+                this=exp.Lower(this=_col(match_field)),
+                expression=exp.Lower(this=_lit(val_str)),
+            )
+        elif mode == "ilike_prefix":
+            name_pred = exp.Like(
+                this=exp.Lower(this=_col(match_field)),
+                expression=exp.Lower(this=_lit(f"{val_str}%")),
+            )
+        else:  # ilike_contains (default)
+            name_pred = exp.Like(
+                this=exp.Lower(this=_col(match_field)),
+                expression=exp.Lower(this=_lit(f"%{val_str}%")),
             )
 
-        # resolver spec must exist in config
-        spec = resolver_cfg.get(r.target_fk)
-        if spec is None:
-            raise OrchestratorError(
-                ErrorCode.MISSING_PARAMETER,
-                f"No resolver configured for '{r.target_fk}'. Add it to resolvers.yaml."
-            )
-
-        via_table = spec.via_table
-        ret_tbl, ret_col = _split_table_column(spec.return_column)
-        if ret_tbl != via_table:
-            raise OrchestratorError(
-                ErrorCode.SCHEMA_MISMATCH,
-                f"resolver.return_column '{spec.return_column}' must belong to via_table '{via_table}'"
-            )
-
-        # must be one-hop allowed by join_graph (either direction)
-        if not _is_one_hop_neighbor(base_table, via_table, join_graph):
-            raise OrchestratorError(
-                ErrorCode.SCHEMA_MISMATCH,
-                f"Resolver path not allowed by join_graph: {base_table} ↔ {via_table}"
-            )
-
-        # Build EXISTS subquery predicate
-        base_fk_col = exp.column(fk_col, table=fk_table)
-        via_ret_col = exp.column(ret_col, table=via_table)
-
-        # Join equality: via.return_column = base.fk
-        join_eq = exp.EQ(this=via_ret_col, expression=base_fk_col)
-
-        # Match condition (case-insensitive; LIKE modes add ESCAPE)
-        mode = r.mode or spec.match.mode or ResolutionMode.ilike_contains
-        match_expr = _build_match_condition(
-            field_fq=spec.match.field,
-            mode=mode,
-            value=r.value,
-            escape_char=(spec.match.escape or "\\"),
+        # Base-table FK column (use canonical mapping if present)
+        base_fk_dotted = (
+            fields.get(target_fk) or
+            dims.get(target_fk) or
+            f"{base_table}.{_col_part(target_fk)}"
         )
 
-        inner_where = exp.and_(join_eq, match_expr)
-
-        subq = (
-            exp.select(exp.Literal.number(1))
-            .from_(exp.Table(this=exp.to_identifier(via_table)))
-            .where(inner_where)
+        subq_where = exp.and_(
+            exp.EQ(this=_col(return_col), expression=_col(base_fk_dotted)),
+            name_pred,
         )
-        # Force a space between EXISTS and '(' to satisfy tests expecting "exists ("
+        subq = exp.select(exp.Literal.number(1)).from_(exp.to_table(via)).where(subq_where)
+
         exists_pred = sqlglot.parse_one(f"EXISTS ({subq.sql()})")
-
         where_expr = exists_pred if where_expr is None else exp.and_(where_expr, exists_pred)
 
-    # 6) Assemble SELECT
-    query = (
-        exp.Select()
-        .from_(exp.Table(this=exp.to_identifier(base_table)))
-        .select(*select_exprs)
-    )
+    # ---------- Build SELECT ----------
+    select_stmt = exp.select(*select_exprs).from_(from_)
 
-    if group_exprs:
-        query.set("group", exp.Group(expressions=group_exprs))
+    # Apply LEFT JOINs for lookup projections (detail mode)
+    if not lqr.metrics:
+        added: Set[str] = set()
+        for pname in lqr.projections:
+            spec = lookup_proj.get(pname)
+            if not spec:
+                continue
+            via = spec.via_table if hasattr(spec, "via_table") else spec.get("via_table")
+            if via in added:
+                continue
+            _ensure_edge(join_graph, base_table, via)
+            # Build ON: AND of all join_on clauses
+            join_on = spec.join_on if hasattr(spec, "join_on") else spec.get("join_on", [])
+            on_expr: Optional[Expression] = None
+            for clause in join_on:
+                left, right = [p.strip() for p in clause.split("=", 1)]
+                cond = exp.EQ(this=_col(left), expression=_col(right))
+                on_expr = cond if on_expr is None else exp.and_(on_expr, cond)
+            select_stmt = select_stmt.join(exp.to_table(via), on=on_expr, join_type="left")
+            added.add(via)
 
+    # WHERE
     if where_expr is not None:
-        query.set("where", exp.Where(this=where_expr))
+        select_stmt = select_stmt.where(where_expr)
 
-    # ORDER BY
+    # GROUP BY / ORDER BY
+    if lqr.metrics and group_exprs:
+        select_stmt = select_stmt.group_by(*group_exprs)
+
     if lqr.order_by:
-        order_terms = []
         for ob in lqr.order_by:
-            if ob.field in metric_aliases:
-                term = exp.Ordered(this=exp.to_identifier(ob.field), desc=(ob.direction.value == "desc"))
-            else:
-                dcol = dim_columns.get(ob.field)
-                if dcol is None:
-                    try:
-                        dcol = _resolve_column(ob.field, field_map, dim_map)
-                    except OrchestratorError:
-                        raise OrchestratorError(
-                            ErrorCode.SCHEMA_MISSING,
-                            f"ORDER BY references unknown field '{ob.field}'"
-                        )
-                if _table_of_column(dcol) != base_table:
-                    raise OrchestratorError(
-                        ErrorCode.SCHEMA_MISMATCH,
-                        f"ORDER BY field '{ob.field}' is on a different table. "
-                        f"Base table: '{base_table}'. Phase 1 prohibits joins."
-                    )
-                term = exp.Ordered(this=dcol.copy(), desc=(ob.direction.value == "desc"))
-            order_terms.append(term)
-        query.set("order", exp.Order(expressions=order_terms))
+            select_stmt = select_stmt.order_by(exp.Identifier(this=ob.field), desc=(ob.direction.value == "desc"))
 
-    # LIMIT  (correct SQLGlot keyword is 'expression')
-    lim = lqr.limit if lqr.limit is not None else 100
-    query.set("limit", exp.Limit(expression=exp.Literal.number(lim)))
+    # LIMIT
+    if lqr.limit:
+        select_stmt = select_stmt.limit(lqr.limit)
 
-    # 7) Serialize
-    try:
-        return query.sql(dialect=dialect)
-    except Exception as e:
-        raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, f"Failed to serialize SQL: {e}")
-
-
-# =========================
-# Internals
-# =========================
-
-# Prefer created dates first; fall back through common names.
-_TIME_DIM_PRIORITIES = [
-    "date_created", "created_at", "created",
-    "order_date", "event_date", "business_date", "date",
-    "install_date",
-    "updated_at", "date_updated",
-    "timestamp", "dt"
-]
-
-def _resolve_column(name: str, fields: Dict[str, str], dims: Dict[str, str]) -> exp.Column:
-    mapping = dims.get(name) or fields.get(name)
-    if not mapping:
-        raise OrchestratorError(ErrorCode.SCHEMA_MISSING, f"Unknown field/dimension: {name}")
-    table, column = _split_table_column(mapping)
-    return exp.column(column, table=table)
-
-
-def _compile_filter(f: Filter, fields: Dict[str, str], dims: Dict[str, str]) -> Optional[Expression]:
-    col = _resolve_column(f.field, fields, dims)
-
-    def lit(v) -> Expression:
-        if isinstance(v, (int, float)):
-            return exp.Literal.number(v)
-        if isinstance(v, bool):
-            return exp.Literal.number(1 if v else 0)
-        return exp.Literal.string(str(v))
-
-    op = f.op.value if hasattr(f.op, "value") else str(f.op)
-
-    if op == "eq":
-        return exp.EQ(this=col, expression=lit(f.value))
-    if op == "neq":
-        return exp.NEQ(this=col, expression=lit(f.value))
-    if op == "gt":
-        return exp.GT(this=col, expression=lit(f.value))
-    if op == "lt":
-        return exp.LT(this=col, expression=lit(f.value))
-    if op == "gte":
-        return exp.GTE(this=col, expression=lit(f.value))
-    if op == "lte":
-        return exp.LTE(this=col, expression=lit(f.value))
-    if op == "between":
-        vals = _as_list(f.value, expect_len=2, ctx="between")
-        return exp.Between(this=col, low=lit(vals[0]), high=lit(vals[1]))
-    if op == "in":
-        vals = _as_list(f.value, expect_len=None, ctx="in")
-        # FIX: The `In` constructor expects an `ExpressionList` passed to the `query` argument,
-        # not a simple list passed to an `expressions` argument.
-        expr_list = exp.ExpressionList(expressions=[lit(v) for v in vals])
-        return exp.In(this=col, query=expr_list)
-    if op == "like":
-        if not isinstance(f.value, str):
-            raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, "LIKE value must be a string")
-        esc = _escape_like(f.value)
-        col_sql = col.sql()
-        pat_sql = exp.Literal.string(esc).sql()
-        raw = f"{col_sql} LIKE {pat_sql} ESCAPE '\\\\'"
-        return sqlglot.parse_one(raw)
-
-    return None
-
-
-def _build_match_condition(field_fq: str, mode: ResolutionMode, value: str, escape_char: str) -> Expression:
-    """
-    Build a case-insensitive predicate for resolver matching:
-      - ilike_contains: LOWER(field) LIKE LOWER('%val%') ESCAPE '\'
-      - ilike_prefix:   LOWER(field) LIKE LOWER('val%')  ESCAPE '\'
-      - exact:          LOWER(field) = LOWER('val')
-    """
-    if "." not in field_fq:
-        raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, f"resolver.match.field must be 'table.column', got '{field_fq}'")
-    t, c = field_fq.split(".", 1)
-    field_col = exp.column(c, table=t)
-
-    if mode == ResolutionMode.exact:
-        raw = f"LOWER({field_col.sql()}) = LOWER({exp.Literal.string(value).sql()})"
-        return sqlglot.parse_one(raw)
-
-    # LIKE variants
-    esc_val = _escape_like(value)
-    if mode == ResolutionMode.ilike_prefix:
-        pattern = f"{esc_val}%"
-    else:
-        pattern = f"%{esc_val}%"
-
-    raw = (
-        f"LOWER({field_col.sql()}) LIKE LOWER({exp.Literal.string(pattern).sql()}) "
-        f"ESCAPE '{escape_char.replace("'", "''")}'"
-    )
-    return sqlglot.parse_one(raw)
-
-
-def _escape_like(s: str) -> str:
-    s = s.replace("\\", "\\\\")
-    s = s.replace("%", "\\%").replace("_", "\\_")
-    return s
-
-
-def _split_table_column(mapping: str) -> Tuple[str, str]:
-    if "." not in mapping:
-        raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, f"Invalid mapping (expected 'table.column'): {mapping}")
-    table, column = mapping.split(".", 1)
-    if not table or not column:
-        raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, f"Invalid mapping (empty parts): {mapping}")
-    return table, column
-
-
-def _tables_from_expression(node: Expression) -> Set[str]:
-    tables: Set[str] = set()
-    for col in node.find_all(exp.Column):
-        t = _table_of_column(col)
-        if t:
-            tables.add(t)
-    return tables
-
-
-def _table_of_column(col: Optional[Expression]) -> str:
-    """
-    Defensive helper: return the table for a Column node, else empty string.
-    We avoid raising AttributeError on unexpected node types.
-    """
-    if col is None:
-        return ""
-    if isinstance(col, exp.Column):
-        if col.table:
-            return col.table
-        # Column without table — treat as invalid mapping upstream
-        raise OrchestratorError(
-            ErrorCode.SCHEMA_MISMATCH,
-            "Unqualified column found. Use 'table.column' in config expressions."
-        )
-    # Non-column node: ignore for table inference
-    return ""
-
-
-def _ensure_single_table(tables: Iterable[str]) -> str:
-    ts = {t for t in tables if t}
-    if not ts:
-        raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, "No base table could be determined from fields/metrics")
-    if len(ts) > 1:
-        raise OrchestratorError(
-            ErrorCode.SCHEMA_MISMATCH,
-            f"Multiple tables referenced {sorted(ts)} but join resolution is not enabled in Phase 1"
-        )
-    return next(iter(ts))
-
-
-def _time_like_candidates(names: Iterable[str]) -> List[str]:
-    out = []
-    for n in names:
-        ln = n.lower()
-        if any(tok in ln for tok in ("date", "time", "timestamp", "created", "dt")):
-            out.append(n)
-    return out[:10]
-
-
-def _pick_time_dimension_for_table(
-    base_table: str,
-    lqr: LogicalQueryRequest,
-    dim_map: Dict[str, str]
-) -> Tuple[Optional[str], Optional[exp.Column]]:
-    # 1) Look among requested dimensions
-    for d in lqr.dimensions:
-        mapping = dim_map.get(d)
-        if mapping and _is_time_like(d) and _table_part(mapping) == base_table:
-            return d, _resolve_column(d, {}, dim_map)
-
-    # 2) Rank all time-like dims for this base table
-    candidates: List[str] = []
-    for name, mapping in dim_map.items():
-        if _table_part(mapping) == base_table and _is_time_like(name):
-            candidates.append(name)
-
-    if candidates:
-        lname_map = {name: name.lower() for name in candidates}
-        for pref in _TIME_DIM_PRIORITIES:
-            for name, ln in lname_map.items():
-                if pref in ln:
-                    return name, _resolve_column(name, {}, dim_map)
-        pick = candidates[0]
-        return pick, _resolve_column(pick, {}, dim_map)
-
-    return None, None
-
-
-def _is_time_like(name: str) -> bool:
-    ln = name.lower()
-    return any(tok in ln for tok in ("date", "time", "timestamp", "created", "dt"))
-
-
-def _as_list(value, expect_len: Optional[int], ctx: str) -> List[Any]:
-    if isinstance(value, (list, tuple)):
-        vals = list(value)
-    else:
-        vals = [value]
-    if expect_len is not None and len(vals) != expect_len:
-        raise OrchestratorError(ErrorCode.SCHEMA_MISMATCH, f"Operator '{ctx}' expects {expect_len} values")
-    return vals
-
-
-def _strip_alias(expr_sql: str) -> str:
-    try:
-        node = sqlglot.parse_one(expr_sql)
-        if isinstance(node, exp.Alias):
-            return node.this.sql()
-        return expr_sql
-    except Exception:
-        return expr_sql
-
-
-def _table_part(mapping: str) -> str:
-    return mapping.split(".", 1)[0] if "." in mapping else mapping
-
-
-def _is_one_hop_neighbor(a: str, b: str, graph: Dict[str, List[str]]) -> bool:
-    """Return True if b is a neighbor of a in join_graph (either direction)."""
-    if not graph:
-        return False
-    return b in (graph.get(a, []) or []) or a in (graph.get(b, []) or [])
+    sql = select_stmt.sql(dialect=dialect)
+    return sql
