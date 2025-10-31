@@ -1,76 +1,4190 @@
-# --- HOSTS ---
-hosts.host_id: hosts.host_id
-hosts.dealer_id: hosts.dealer_id
-hosts.programmatic_id: hosts.programmatic_id
-hosts.user_id: hosts.user_id
-hosts.name: hosts.name
-hosts.address: hosts.address
-hosts.city: hosts.city
-hosts.state: hosts.state
-hosts.region: hosts.region
-hosts.country: hosts.country
-hosts.postal_code: hosts.postal_code
-hosts.latitude: hosts.latitude
-hosts.longitude: hosts.longitude
-hosts.time_zone: hosts.time_zone
-hosts.store_hours: hosts.store_hours
-hosts.venue_type: hosts.venue_type
-hosts.monthly_traffic: hosts.monthly_traffic
-hosts.avg_dwell_time: hosts.avg_dwell_time
-hosts.avg_ticket: hosts.avg_ticket
-hosts.demographics: hosts.demographics
-hosts.internet: hosts.internet
-hosts.install_date: hosts.install_date
-hosts.date_created: hosts.date_created
-hosts.date_updated: hosts.date_updated
-hosts.status: hosts.status
-hosts.category: hosts.category
-hosts.vistar_venue_id: hosts.vistar_venue_id
-hosts.contact_person: hosts.contact_person
-hosts.contact_number: hosts.contact_number
-
-# --- DEALERS ---
-dealers.dealer_id: dealers.dealer_id
-dealers.generated_id: dealers.generated_ID
-dealers.business_name: dealers.business_name
-dealers.contact_person: dealers.contact_person
-dealers.contact_number: dealers.contact_number
-dealers.address: dealers.address
-dealers.city: dealers.city
-dealers.state: dealers.state
-dealers.region: dealers.region
-dealers.zip: dealers.zip
-dealers.user_id: dealers.user_id
-dealers.dealer_type: dealers.dealer_type
-dealers.license_count: dealers.license_count
-dealers.player_count: dealers.player_count
-dealers.dealer_id_alias: dealers.dealer_id_alias
-dealers.start_date: dealers.start_date
-dealers.date_created: dealers.date_created
-dealers.date_updated: dealers.date_updated
-dealers.status: dealers.status
-dealers.logo: dealers.logo
-
-# --- LICENSES ---
-licenses.license_id: licenses.license_id
-licenses.license_key: licenses.license_key
-licenses.mac_address: licenses.mac_address
-licenses.is_registered: licenses.is_registered
-licenses.is_activated: licenses.is_activated
-licenses.dealer_id: licenses.dealer_id
-licenses.host_id: licenses.host_id
-licenses.internet_type: licenses.internet_type
-licenses.internet_speed: licenses.internet_speed
-licenses.date_created: licenses.date_created
-licenses.date_updated: licenses.date_updated
-licenses.install_date: licenses.install_date
-licenses.player_status: licenses.player_status
-licenses.pi_status: licenses.pi_status
-licenses.display_status: licenses.display_status
-licenses.server_version: licenses.server_version
-licenses.ui_version: licenses.ui_version
-licenses.screenshot: licenses.screenshot
-licenses.reboot_time: licenses.reboot_time
-licenses.tv_brand: licenses.tv_brand
-licenses.public_ip: licenses.public_ip
-licenses.prev_public_ip: licenses.prev_public_ip
+activities:
+  activity_code:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  activity_description:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: NULL ON UPDATE CURRENT_TIMESTAMP
+activity_logs:
+  activity_log_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  activity_code:
+    data_type: varchar(64)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  initiated_by:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+advertiser_activity_logs:
+  activity_log_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  activity_code:
+    data_type: text
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  initiated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  owner_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+advertiser_deleted_contents_for_logs:
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  title:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  file_name:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+advertisers:
+  id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  dealer_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  user_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  advertiser_id:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  name:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  region:
+    data_type: varchar(150)
+    nullable: true
+    default: 'NULL'
+  state:
+    data_type: varchar(150)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(100)
+    nullable: false
+    default: '''A'''
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  updated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  latitude:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  longitude:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  city:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  postal_code:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  address:
+    data_type: text
+    nullable: true
+    default: null
+  category:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  logo:
+    data_type: mediumtext
+    nullable: true
+    default: null
+blacklisted_contents:
+  blacklisted_content_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+categories:
+  category_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  gcid:
+    data_type: varchar(256)
+    nullable: false
+    default: null
+  category:
+    data_type: varchar(256)
+    nullable: false
+    default: null
+  general_category:
+    data_type: varchar(256)
+    nullable: false
+    default: null
+cities:
+  id:
+    data_type: bigint
+    nullable: false
+    default: null
+    __is_pk__: true
+  city:
+    data_type: varchar(128)
+    nullable: false
+    default: null
+  state:
+    data_type: varchar(128)
+    nullable: false
+    default: null
+cities_state_data:
+  id:
+    data_type: int
+    nullable: false
+    default: null
+    __is_pk__: true
+  city:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  state:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  abbreviation:
+    data_type: varchar(10)
+    nullable: true
+    default: 'NULL'
+  region:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  country:
+    data_type: varchar(10)
+    nullable: true
+    default: 'NULL'
+  is_manually_added:
+    data_type: tinyint(1)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  updated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+content_history_logs:
+  log_id:
+    data_type: bigint
+    nullable: false
+    default: null
+    __is_pk__: true
+  playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  playlist_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  action:
+    data_type: varchar(30)
+    nullable: false
+    default: null
+  log_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  user_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+content_play_logs:
+  log_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  log_date:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+content_plays_daily:
+  log_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  log_date:
+    data_type: date
+    nullable: false
+    default: null
+  total:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  duration:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  playlist_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+content_plays_daily_2024_july_august:
+  log_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  log_date:
+    data_type: date
+    nullable: false
+    default: null
+  total:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  duration:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  playlist_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+content_plays_daily_logs:
+  log_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  playlist_content_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  license_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  content_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  log_date:
+    data_type: date
+    nullable: false
+    default: null
+  total:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  duration:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  playlist_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+content_plays_daily_migration:
+  log_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  log_date:
+    data_type: date
+    nullable: false
+    default: null
+    __is_pk__: true
+  total:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  duration:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  playlist_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+content_plays_daily_migration_params:
+  param_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  from_date:
+    data_type: varchar(10)
+    nullable: false
+    default: null
+  to_date:
+    data_type: varchar(10)
+    nullable: false
+    default: null
+content_plays_daily_replicate:
+  log_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  log_date:
+    data_type: date
+    nullable: false
+    default: null
+  total:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  duration:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  playlist_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+content_plays_hourly:
+  log_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  log_date:
+    data_type: date
+    nullable: false
+    default: null
+  hour:
+    data_type: varchar(5)
+    nullable: false
+    default: null
+  total:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  duration:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  playlist_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+contents:
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  dealer_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  host_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  advertiser_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  file_name:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  url:
+    data_type: varchar(512)
+    nullable: false
+    default: null
+  file_type:
+    data_type: varchar(64)
+    nullable: false
+    default: null
+  embedded_script:
+    data_type: mediumtext
+    nullable: true
+    default: null
+  handler_id:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: null
+  uuid:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  file_size:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  filestack_uuid:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  filestack_status:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  is_converted:
+    data_type: tinyint(1)
+    nullable: false
+    default: '''0'''
+  created_by:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  description:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  title:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  classification:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  duration:
+    data_type: float
+    nullable: true
+    default: 'NULL'
+  prefix:
+    data_type: varchar(50)
+    nullable: true
+    default: 'NULL'
+  ref_dealer_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  ref_content_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  feed_id:
+    data_type: char(100)
+    nullable: true
+    default: 'NULL'
+  is_protected:
+    data_type: int
+    nullable: false
+    default: '''0'' COMMENT ''Add a slider-toggle that enables super admin users to
+      lock a content. Locked contents will disable dealers from deleting the set content.'''
+  owner_role_id:
+    data_type: int
+    nullable: false
+    default: '''1'' COMMENT ''1 = admin'
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: CURRENT_TIMESTAMP
+  is_deleted:
+    data_type: tinyint(1)
+    nullable: true
+    default: '''0'''
+  deleted_at:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  deleted_by:
+    data_type: varchar(50)
+    nullable: true
+    default: 'NULL'
+  deleted_reason:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+countries:
+  id:
+    data_type: mediumint unsigned
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  iso3:
+    data_type: char(3)
+    nullable: true
+    default: 'NULL'
+  numeric_code:
+    data_type: char(3)
+    nullable: true
+    default: 'NULL'
+  iso2:
+    data_type: char(2)
+    nullable: true
+    default: 'NULL'
+  phonecode:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  capital:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  currency:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  currency_name:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  currency_symbol:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  tld:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  native:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  region:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  subregion:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  timezones:
+    data_type: text
+    nullable: true
+    default: null
+  translations:
+    data_type: text
+    nullable: true
+    default: null
+  latitude:
+    data_type: decimal(10,8)
+    nullable: true
+    default: 'NULL'
+  longitude:
+    data_type: decimal(11,8)
+    nullable: true
+    default: 'NULL'
+  emoji:
+    data_type: varchar(191)
+    nullable: true
+    default: 'NULL'
+  emojiU:
+    data_type: varchar(191)
+    nullable: true
+    default: 'NULL'
+  created_at:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  updated_at:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  flag:
+    data_type: tinyint(1)
+    nullable: false
+    default: '''1'''
+  wikiDataId:
+    data_type: varchar(255)
+    nullable: true
+    default: NULL COMMENT 'Rapid API GeoDB Cities'
+dealer_activity_logs:
+  activity_log_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  activity_code:
+    data_type: text
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  initiated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  owner_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+dealer_address_books:
+  dealer_address_book_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  dealer_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  type_id:
+    data_type: int
+    nullable: false
+    default: '''1'' COMMENT ''1 - billing addresss'
+  address:
+    data_type: text
+    nullable: true
+    default: null
+  country:
+    data_type: varchar(400)
+    nullable: true
+    default: 'NULL'
+  city:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  state:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  zip:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  is_default:
+    data_type: int
+    nullable: false
+    default: '''1'' COMMENT ''1 - default'''
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(100)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+dealer_admins:
+  id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  dealer_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  user_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  created_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  updated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: ''''''
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(100)
+    nullable: false
+    default: '''A'''
+dealer_contract_details:
+  dealer_contract_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  dealer_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+  eff_date:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  minutes:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  start_up:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  contr_lic:
+    data_type: int
+    nullable: true
+    default: '''0'''
+  lic_to_start:
+    data_type: int
+    nullable: true
+    default: '''0'''
+  base:
+    data_type: bigint
+    nullable: true
+    default: '''0'''
+  cost_per_lic:
+    data_type: decimal(5,2)
+    nullable: true
+    default: '''0.00'''
+  13th_month:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  19th_month:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  25th_month:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  31st_month:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  cost_new_lic:
+    data_type: decimal(5,2)
+    nullable: true
+    default: '''0.00'''
+  lic_count:
+    data_type: int
+    nullable: true
+    default: '''0'''
+  total_monthly_billing:
+    data_type: decimal(5,2)
+    nullable: true
+    default: '''0.00'''
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(36)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(100)
+    nullable: false
+    default: '''A'''
+dealer_templates:
+  dealer_template_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  dealer_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  template_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+dealer_unused_contents:
+  dealer_unused_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  dealer_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  for_deletion:
+    data_type: tinyint
+    nullable: true
+    default: 'NULL'
+  days_unused:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: null
+dealer_values:
+  dealer_value_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  dealer_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  month1:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  month19:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  month25:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  month31:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  month37:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  base_fee:
+    data_type: decimal(9,2)
+    nullable: false
+    default: '''0.00'''
+  per_license:
+    data_type: decimal(9,2)
+    nullable: false
+    default: '''0.00'''
+  billing:
+    data_type: decimal(9,2)
+    nullable: false
+    default: '''0.00'''
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: true
+    default: NULL ON UPDATE CURRENT_TIMESTAMP
+  billable_licenses:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  license_price_new:
+    data_type: decimal(9,2)
+    nullable: false
+    default: '''0.00'''
+  billing_date:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  auto_charge:
+    data_type: tinyint(1)
+    nullable: false
+    default: '''0'''
+  email:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  stripe_id:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+dealers:
+  dealer_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  generated_ID:
+    data_type: varchar(20)
+    nullable: false
+    default: null
+  business_name:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  contact_person:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  contact_number:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  region:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  state:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  city:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  user_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(100)
+    nullable: false
+    default: '''A'''
+  address:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  zip:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  dealer_type:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  license_count:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  dealer_id_alias:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  player_count:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  start_date:
+    data_type: date
+    nullable: true
+    default: 'NULL'
+  logo:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+dealers_contract_files:
+  dealers_contract_file_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  dealer_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  s3_filename:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  filename:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: true
+    default: NULL ON UPDATE CURRENT_TIMESTAMP
+dealers_new:
+  dealer_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  generated_ID:
+    data_type: varchar(20)
+    nullable: false
+    default: null
+  business_name:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  contact_person:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  contact_number:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  region:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  state:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  city:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  user_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(100)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(100)
+    nullable: false
+    default: '''A'''
+  address:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  zip:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  dealer_type:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  license_count:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  dealer_id_alias:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  player_count:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  start_date:
+    data_type: date
+    nullable: true
+    default: 'NULL'
+  logo:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+dealers_territory_files:
+  dealers_territory_file_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  dealer_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  s3_filename:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  filename:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: true
+    default: NULL ON UPDATE CURRENT_TIMESTAMP
+dma:
+  dma_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  zip:
+    data_type: varchar(64)
+    nullable: false
+    default: null
+  city:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  state:
+    data_type: varchar(8)
+    nullable: true
+    default: 'NULL'
+  county:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  fips:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  timezone:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  area_code:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  country:
+    data_type: varchar(8)
+    nullable: true
+    default: 'NULL'
+  population:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  latitude:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  longitude:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  utc:
+    data_type: varchar(8)
+    nullable: true
+    default: 'NULL'
+  dma_name:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  dma_rank:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  dma_pct:
+    data_type: decimal(9,4)
+    nullable: true
+    default: 'NULL'
+  dma_code:
+    data_type: varchar(8)
+    nullable: true
+    default: 'NULL'
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: true
+    default: NULL ON UPDATE CURRENT_TIMESTAMP
+feed_fillers:
+  feed_filler_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  feed_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+  group:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  min:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  folder_name:
+    data_type: varchar(455)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+feed_global_settings:
+  feed_global_setting_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  feed_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+  overlay:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  font_family:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  font_color:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  banner_image:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  animation:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  text_align:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  headline_background:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  headline_color:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: true
+    default: CURRENT_TIMESTAMP
+  status:
+    data_type: char(10)
+    nullable: true
+    default: '''A'''
+  image_animation:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  header_image_size:
+    data_type: int
+    nullable: false
+    default: '''0'''
+feed_news:
+  feed_news_id:
+    data_type: varchar(50)
+    nullable: false
+    default: null
+    __is_pk__: true
+  feed_id:
+    data_type: varchar(50)
+    nullable: false
+    default: null
+  rss_feed_url:
+    data_type: varchar(500)
+    nullable: false
+    default: null
+  rss_feed_data:
+    data_type: text
+    nullable: true
+    default: null
+  results:
+    data_type: varchar(50)
+    nullable: true
+    default: 'NULL'
+  loop_cycle:
+    data_type: varchar(50)
+    nullable: true
+    default: 'NULL'
+  time:
+    data_type: varchar(50)
+    nullable: true
+    default: 'NULL'
+  font_color:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  font_size:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  margin_top:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  margin_left:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  background_content_id:
+    data_type: varchar(50)
+    nullable: true
+    default: 'NULL'
+  background_color:
+    data_type: varchar(50)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+feed_slides:
+  feed_slide_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  feed_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+  content_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+  heading:
+    data_type: text
+    nullable: true
+    default: null
+  paragraph:
+    data_type: text
+    nullable: true
+    default: null
+  duration:
+    data_type: float
+    nullable: false
+    default: '''5'''
+  sequence:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+feed_types:
+  feed_type_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  description:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+feed_weathers:
+  feed_weather_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  feed_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+  background_content_id:
+    data_type: char(100)
+    nullable: true
+    default: 'NULL'
+  banner_content_id:
+    data_type: char(100)
+    nullable: true
+    default: 'NULL'
+  box_background_color:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  days_font_color:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  number_days:
+    data_type: int
+    nullable: true
+    default: '''4'''
+  font_family:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  zip_code:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  orientation:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  footer_content_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  header_image_size:
+    data_type: int
+    nullable: false
+    default: '''400'''
+  footer_image_size:
+    data_type: int
+    nullable: false
+    default: '''400'''
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+feeds:
+  feed_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+  dealer_id:
+    data_type: char(100)
+    nullable: true
+    default: 'NULL'
+  feed_type_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+  feed_title:
+    data_type: varchar(500)
+    nullable: false
+    default: null
+  description:
+    data_type: text
+    nullable: true
+    default: null
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(36)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+field_group_fields:
+  field_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  field_group_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  field_name:
+    data_type: varchar(128)
+    nullable: false
+    default: null
+  field_type:
+    data_type: varchar(32)
+    nullable: false
+    default: null
+  field_length:
+    data_type: int
+    nullable: true
+    default: '''256'''
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+field_group_values:
+  field_value_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  host_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  host_field_group_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  field_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  value:
+    data_type: varchar(256)
+    nullable: false
+    default: null
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+field_groups:
+  field_group_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  field_group_name:
+    data_type: varchar(128)
+    nullable: false
+    default: null
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+filler_contents:
+  filler_content_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  filler_group_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  handler_id:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  sorting:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  file_type:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  file_size:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  duration:
+    data_type: float
+    nullable: true
+    default: 'NULL'
+  uuid:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  filename:
+    data_type: text
+    nullable: true
+    default: null
+  metadata:
+    data_type: json
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(36)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+  url:
+    data_type: text
+    nullable: true
+    default: null
+  title:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  is_converted:
+    data_type: tinyint
+    nullable: false
+    default: '''0'''
+filler_contents_schedule:
+  filler_contents_schedule_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  filler_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  filler_group_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  type:
+    data_type: int
+    nullable: true
+    default: NULL COMMENT '1 = default play
+  recurring:
+    data_type: tinyint(1)
+    nullable: false
+    default: '''0'' COMMENT ''Indicates if the schedule is recurring'''
+  live_stream:
+    data_type: int
+    nullable: false
+    default: '''0'' COMMENT ''1 = live stream'
+  from:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  to:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  days:
+    data_type: varchar(255)
+    nullable: false
+    default: null
+  alternate_week:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  play_time_start:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  play_time_end:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: true
+    default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  status:
+    data_type: char(10)
+    nullable: true
+    default: '''A'''
+filler_group_blacklisted:
+  filler_group_blacklisted_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  filler_group_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  owner_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  type:
+    data_type: int
+    nullable: true
+    default: '''0'' COMMENT ''1 if dealer'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(36)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+filler_group_schedules:
+  id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  filler_content_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  filler_group_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  from:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  to:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  recurring:
+    data_type: int
+    nullable: true
+    default: '''0'''
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(36)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+filler_groups:
+  filler_group_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  cover_photo:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  paired:
+    data_type: int
+    nullable: true
+    default: '''0'''
+  description:
+    data_type: text
+    nullable: true
+    default: null
+  role:
+    data_type: int
+    nullable: true
+    default: '''0'' COMMENT ''1 = admin'
+  dealer_id:
+    data_type: varchar(100)
+    nullable: true
+    default: NULL COMMENT 'dealer id'
+  metadata:
+    data_type: json
+    nullable: true
+    default: 'NULL'
+  assigned_to:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(36)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+  handler_id:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  admin_only:
+    data_type: int
+    nullable: false
+    default: '''0'''
+filler_logs:
+  id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  license_key:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  filler_playlist_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  group_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  current_index:
+    data_type: int
+    nullable: true
+    default: '''0'''
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+filler_playlist_contents:
+  filler_playlist_contents_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  filler_playlist_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  content_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  group_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(100)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+filler_playlist_dealers:
+  filler_playlist_dealer_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  filler_playlist_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  dealer_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(36)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+filler_playlist_groups:
+  filler_playlist_group_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  filler_playlist_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  filler_group_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  quantity:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  metadata:
+    data_type: json
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(36)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+filler_playlists:
+  filler_playlist_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  description:
+    data_type: text
+    nullable: true
+    default: null
+  role:
+    data_type: int
+    nullable: true
+    default: '''0'' COMMENT ''1 = admin'
+  dealer_id:
+    data_type: varchar(100)
+    nullable: true
+    default: NULL COMMENT 'dealer id'
+  interval:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  duration:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  metadata:
+    data_type: json
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(100)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+filler_playlists_20240305:
+  filler_playlist_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  description:
+    data_type: text
+    nullable: true
+    default: null
+  role:
+    data_type: int
+    nullable: true
+    default: '''0'' COMMENT ''1 = admin'
+  dealer_id:
+    data_type: varchar(100)
+    nullable: true
+    default: NULL COMMENT 'dealer id'
+  interval:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  duration:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  metadata:
+    data_type: json
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(100)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: char(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+global_settings:
+  id:
+    data_type: bigint
+    nullable: false
+    default: null
+    __is_pk__: true
+  vistar_network_id:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  vistar_api_key:
+    data_type: varchar(800)
+    nullable: true
+    default: 'NULL'
+  pxchange_access_token:
+    data_type: text
+    nullable: true
+    default: null
+  pxchange_id_token:
+    data_type: text
+    nullable: true
+    default: null
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+host_activity_logs:
+  activity_log_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  activity_code:
+    data_type: text
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  initiated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  owner_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+host_field_groups:
+  host_field_group_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  host_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  field_group_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+host_files:
+  id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  host_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  s3_filename:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  filename:
+    data_type: varchar(500)
+    nullable: false
+    default: null
+  alias:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  type:
+    data_type: varchar(10)
+    nullable: false
+    default: null
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  created_by:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+host_programmatic:
+  programmatic_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  veneue_name:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  lat:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  lng:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  zip:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  host_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+host_support_tickets:
+  ticket_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  host_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  notes:
+    data_type: mediumtext
+    nullable: true
+    default: null
+  url:
+    data_type: varchar(512)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+hosts:
+  host_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  programmatic_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  programmatic_date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  dealer_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  user_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  name:
+    data_type: varchar(300)
+    nullable: false
+    default: null
+  address:
+    data_type: text
+    nullable: true
+    default: null
+  street:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  city:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  postal_code:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  region:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  state:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  country:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  group_id:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  latitude:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  longitude:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  time_zone:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  store_hours:
+    data_type: longtext
+    nullable: true
+    default: null
+  venue_type:
+    data_type: varchar(150)
+    nullable: true
+    default: 'NULL'
+  monthly_traffic:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  avg_dwell_time:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  avg_ticket:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  demographics:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  internet:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  notes:
+    data_type: mediumtext
+    nullable: true
+    default: null
+  install_date:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: true
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(100)
+    nullable: false
+    default: '''A'''
+  category:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  vistar_venue_id:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  others:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  logo:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  contact_person:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  contact_number:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+hosts_import:
+  id:
+    data_type: int
+    nullable: false
+    default: null
+    __is_pk__: true
+  host_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  name:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  longitude:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  latitude:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+installation_checklist_items:
+  installation_checklist_item_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  installation_checklist_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  title:
+    data_type: varchar(256)
+    nullable: false
+    default: null
+  description:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  seq:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: true
+    default: NULL ON UPDATE CURRENT_TIMESTAMP
+installation_checklists:
+  installation_checklist_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  title:
+    data_type: varchar(256)
+    nullable: false
+    default: null
+  description:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  seq:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: true
+    default: NULL ON UPDATE CURRENT_TIMESTAMP
+license_favorites:
+  license_favorite_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  user_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: true
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+license_installation_checklists:
+  license_installation_checklist_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  installation_checklist_item_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  is_done:
+    data_type: tinyint(1)
+    nullable: false
+    default: '''0'''
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: true
+    default: NULL ON UPDATE CURRENT_TIMESTAMP
+license_playlist_contents:
+  license_playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  created_by:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: null
+license_screens:
+  license_screen_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  screen_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+licenses:
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  license_key:
+    data_type: varchar(128)
+    nullable: false
+    default: null
+  mac_address:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  is_registered:
+    data_type: tinyint(1)
+    nullable: false
+    default: null
+  is_activated:
+    data_type: tinyint(1)
+    nullable: false
+    default: null
+  dealer_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  host_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  internet_type:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  internet_speed:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  memory:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  total_storage:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  free_storage:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  contents_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  player_socket_id:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  pi_socket_id:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  player_status:
+    data_type: tinyint(1)
+    nullable: true
+    default: 'NULL'
+  pi_status:
+    data_type: tinyint(1)
+    nullable: true
+    default: 'NULL'
+  sequence:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  alias:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  time_in:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  time_out:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  anydesk_id:
+    data_type: varchar(16)
+    nullable: true
+    default: 'NULL'
+  app_version:
+    data_type: varchar(1024)
+    nullable: true
+    default: 'NULL'
+  player_ui_key:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  player_asset_server_key:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  install_date:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  install_date2:
+    data_type: varchar(150)
+    nullable: true
+    default: 'NULL'
+  internet_info:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  screenshot:
+    data_type: varchar(250)
+    nullable: true
+    default: 'NULL'
+  display_status:
+    data_type: tinyint(1)
+    nullable: false
+    default: '''0'''
+  server_version:
+    data_type: varchar(32)
+    nullable: true
+    default: 'NULL'
+  ui_version:
+    data_type: varchar(32)
+    nullable: true
+    default: 'NULL'
+  screenshot_settings:
+    data_type: int
+    nullable: true
+    default: '''1'''
+  speedtest_settings:
+    data_type: int
+    nullable: true
+    default: '''1'''
+  boot_delay:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  email_settings:
+    data_type: int
+    nullable: false
+    default: '''1'' COMMENT ''email notification'''
+  notification_settings:
+    data_type: int
+    nullable: false
+    default: '''1'' COMMENT ''alert notification'''
+  tvdisplay_settings:
+    data_type: int
+    nullable: true
+    default: '''0'''
+  reboot_time:
+    data_type: varchar(512)
+    nullable: true
+    default: 'NULL'
+  is_cec_enabled:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  is_cec_ctl_enabled:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  fast_edge_monitoring_tool:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  tv_brand:
+    data_type: varchar(450)
+    nullable: true
+    default: 'NULL'
+  public_ip:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  prev_public_ip:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  resource_settings:
+    data_type: int
+    nullable: true
+    default: '''0'''
+  display_control_settings:
+    data_type: int
+    nullable: true
+    default: '''1'''
+  install_request_date:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  background_image_url:
+    data_type: varchar(512)
+    nullable: true
+    default: 'NULL'
+  enable_updates:
+    data_type: bit(1)
+    nullable: false
+    default: b'0'
+  pi_local_date_time:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  display_status_date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  player_status_date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+licenses_acquired:
+  license_acquired_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  license_key:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  dealer_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  is_transferred:
+    data_type: tinyint(1)
+    nullable: false
+    default: '''0'''
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: NULL ON UPDATE CURRENT_TIMESTAMP
+news_cron:
+  id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  url:
+    data_type: text
+    nullable: false
+    default: null
+  data:
+    data_type: longtext
+    nullable: true
+    default: null
+  date_updated:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  error:
+    data_type: text
+    nullable: true
+    default: null
+notification_logs:
+  notification_id:
+    data_type: bigint
+    nullable: false
+    default: null
+    __is_pk__: true
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  type:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  date_added:
+    data_type: datetime
+    nullable: false
+    default: null
+  timezone:
+    data_type: varchar(50)
+    nullable: false
+    default: '''US/Central'''
+  is_sent:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  is_opened:
+    data_type: tinyint
+    nullable: false
+    default: '''0'''
+  source:
+    data_type: int
+    nullable: false
+    default: '''0'' COMMENT ''0 if from socket else manual'''
+  log_date:
+    data_type: datetime
+    nullable: true
+    default: NULL COMMENT 'data coming from pi date'
+notifications:
+  id:
+    data_type: char(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  receiver_id:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  message:
+    data_type: mediumtext
+    nullable: true
+    default: null
+  type:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  open:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  created_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(50)
+    nullable: false
+    default: '''A'''
+orders_viewed:
+  order_id:
+    data_type: varchar(300)
+    nullable: false
+    default: null
+    __is_pk__: true
+  has_viewed:
+    data_type: int
+    nullable: false
+    default: '''1'''
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  created_by:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+permissions:
+  permission_id:
+    data_type: int
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(250)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+placer_dumps:
+  placer_dump_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  placer_id:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  foot_traffic:
+    data_type: int
+    nullable: true
+    default: '''0'''
+  average_dwell_time:
+    data_type: decimal(10,2)
+    nullable: true
+    default: '''0.00'''
+  publication_date:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  start_date:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  end_date:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  source_file:
+    data_type: text
+    nullable: true
+    default: null
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+placers:
+  placer_id:
+    data_type: varchar(300)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: text
+    nullable: true
+    default: null
+  host_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  latitude:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  longitude:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(10)
+    nullable: false
+    default: '''A'''
+player_app_versions:
+  version_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  app_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+  version:
+    data_type: varchar(64)
+    nullable: false
+    default: null
+  release_notes:
+    data_type: text
+    nullable: true
+    default: null
+  zip_url:
+    data_type: varchar(512)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+player_apps:
+  app_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  app_name:
+    data_type: varchar(64)
+    nullable: false
+    default: null
+  app_description:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  github_url:
+    data_type: varchar(512)
+    nullable: false
+    default: null
+  current_version:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+player_asset_server:
+  player_asset_server_key:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(64)
+    nullable: false
+    default: null
+  description:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+player_ui:
+  player_ui_key:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(64)
+    nullable: false
+    default: null
+  description:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+playlist_content_credits:
+  playlist_content_credit_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  license_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  credits:
+    data_type: bigint
+    nullable: false
+    default: '''0'''
+  balance:
+    data_type: bigint
+    nullable: false
+    default: '''0'''
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(10)
+    nullable: false
+    default: '''A'''
+playlist_contents:
+  playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  playlist_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  is_full_screen:
+    data_type: tinyint(1)
+    nullable: false
+    default: '''0'''
+  seq:
+    data_type: int
+    nullable: true
+    default: 'NULL'
+  duration:
+    data_type: float
+    nullable: true
+    default: '''20'''
+  frequency:
+    data_type: int
+    nullable: true
+    default: '''0'''
+  parent_id:
+    data_type: varchar(100)
+    nullable: true
+    default: NULL COMMENT ' playlist_content_id parent id'
+  credits_enabled:
+    data_type: int
+    nullable: true
+    default: '''0'''
+playlist_contents_schedule:
+  playlist_contents_schedule_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  playlist_content_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  type:
+    data_type: int
+    nullable: true
+    default: NULL COMMENT '1 = default play
+  live_stream:
+    data_type: int
+    nullable: false
+    default: '''0'' COMMENT ''1 = live stream'
+  from:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  to:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  days:
+    data_type: varchar(255)
+    nullable: false
+    default: null
+  alternate_week:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  play_time_start:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  play_time_end:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: true
+    default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  status:
+    data_type: char(10)
+    nullable: true
+    default: '''A'''
+playlists:
+  playlist_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  dealer_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  name:
+    data_type: varchar(128)
+    nullable: false
+    default: null
+  description:
+    data_type: varchar(256)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  is_migrated:
+    data_type: tinyint(1)
+    nullable: false
+    default: '''0'''
+purchase_items:
+  order_no:
+    data_type: varchar(150)
+    nullable: false
+    default: null
+    __is_pk__: true
+  dealer_id:
+    data_type: char(100)
+    nullable: false
+    default: null
+  status:
+    data_type: varchar(255)
+    nullable: true
+    default: NULL COMMENT 'NEW ORDER - SHIPPED'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  created_by:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: NULL ON UPDATE CURRENT_TIMESTAMP
+  updated_by:
+    data_type: varchar(255)
+    nullable: true
+    default: 'NULL'
+release_notes:
+  release_note_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  title:
+    data_type: varchar(500)
+    nullable: false
+    default: null
+  description:
+    data_type: text
+    nullable: true
+    default: null
+  version:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: varchar(455)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+resource_logs:
+  resource_log_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  license_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  ram_usage:
+    data_type: int
+    nullable: false
+    default: null
+  cpu_usage:
+    data_type: int
+    nullable: false
+    default: null
+  uptime:
+    data_type: varchar(128)
+    nullable: false
+    default: null
+  log_date:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  log_hour:
+    data_type: varchar(5)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+roles:
+  role_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  role_name:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(100)
+    nullable: false
+    default: '''A'' COMMENT ''Active or InActive'''
+screen_template_zone_playlists:
+  screen_template_zone_playlist_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  screen_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  template_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  template_zone_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  playlist_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+screen_types:
+  screen_type_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(64)
+    nullable: false
+    default: null
+  description:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+screens:
+  screen_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  screen_name:
+    data_type: varchar(256)
+    nullable: false
+    default: null
+  description:
+    data_type: mediumtext
+    nullable: true
+    default: null
+  dealer_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  host_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  template_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  screen_type_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+states_us_ca:
+  id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  state:
+    data_type: varchar(128)
+    nullable: false
+    default: null
+  abbreviation:
+    data_type: varchar(10)
+    nullable: false
+    default: null
+  region:
+    data_type: varchar(128)
+    nullable: false
+    default: null
+  country:
+    data_type: varchar(10)
+    nullable: false
+    default: null
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  updated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+stripe_users:
+  dealer_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  email:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  stripe_id:
+    data_type: varchar(128)
+    nullable: true
+    default: 'NULL'
+  created_date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  updated_date:
+    data_type: timestamp
+    nullable: true
+    default: NULL ON UPDATE CURRENT_TIMESTAMP
+  status:
+    data_type: varchar(10)
+    nullable: true
+    default: '''A'''
+tag_details:
+  tag_details_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  tag_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  tag_type_id:
+    data_type: bigint
+    nullable: false
+    default: null
+  owner_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+tag_types:
+  tag_type_id:
+    data_type: bigint
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(255)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  status:
+    data_type: varchar(10)
+    nullable: false
+    default: '''A'''
+tags:
+  tag_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(255)
+    nullable: false
+    default: null
+  description:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  tag_color:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  created_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  role:
+    data_type: int
+    nullable: false
+    default: '''2'' COMMENT ''1 = admin'
+  dealer_id:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  exclude:
+    data_type: int
+    nullable: false
+    default: '''0'''
+template_zones:
+  template_zone_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  template_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  name:
+    data_type: varchar(128)
+    nullable: false
+    default: null
+  description:
+    data_type: varchar(256)
+    nullable: true
+    default: 'NULL'
+  x_pos:
+    data_type: int
+    nullable: false
+    default: null
+  y_pos:
+    data_type: int
+    nullable: false
+    default: null
+  height:
+    data_type: int
+    nullable: false
+    default: null
+  width:
+    data_type: int
+    nullable: false
+    default: null
+  background:
+    data_type: varchar(64)
+    nullable: false
+    default: null
+  order:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  is_main_zone:
+    data_type: bit(1)
+    nullable: true
+    default: b'0'
+templates:
+  template_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(128)
+    nullable: false
+    default: null
+time_zones:
+  id:
+    data_type: char(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  status:
+    data_type: varchar(10)
+    nullable: false
+    default: '''A'''
+tv_brands:
+  brand_id:
+    data_type: varchar(20)
+    nullable: false
+    default: null
+    __is_pk__: true
+  brand_name:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+user_activity_logs:
+  activity_log_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+  owner_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  activity_code:
+    data_type: varchar(64)
+    nullable: false
+    default: null
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  initiated_by:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  target_id:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  target_name:
+    data_type: char(100)
+    nullable: true
+    default: 'NULL'
+  activity_details:
+    data_type: json
+    nullable: true
+    default: 'NULL'
+user_roles:
+  uer_role_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+    __is_pk__: true
+  user_id:
+    data_type: char(36)
+    nullable: false
+    default: null
+  role_id:
+    data_type: varchar(36)
+    nullable: false
+    default: null
+  parent_id:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  permission:
+    data_type: varchar(50)
+    nullable: true
+    default: '''E'' COMMENT ''E - edit'
+  status:
+    data_type: char(10)
+    nullable: false
+    default: '''A'''
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  updated_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+users:
+  user_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  first_name:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  middle_name:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  last_name:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  email:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  password:
+    data_type: varchar(500)
+    nullable: false
+    default: null
+  profile_picture:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  contact_number:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: true
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: timestamp
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  updated_by:
+    data_type: char(36)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(100)
+    nullable: false
+    default: '''A'''
+  token:
+    data_type: mediumtext
+    nullable: true
+    default: null
+  refresh_token:
+    data_type: mediumtext
+    nullable: true
+    default: null
+  allow_email:
+    data_type: int
+    nullable: false
+    default: '''0'''
+  allow_target_release_permission:
+    data_type: tinyint(1)
+    nullable: false
+    default: '''0'''
+  last_logged_in_date:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  playlist_tour:
+    data_type: json
+    nullable: true
+    default: 'NULL'
+webhooks:
+  id:
+    data_type: int
+    nullable: false
+    default: null
+    __is_pk__: true
+  uuid:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  text:
+    data_type: varchar(500)
+    nullable: false
+    default: null
+  url:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  file_type:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  date:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  host_id:
+    data_type: varchar(36)
+    nullable: true
+    default: 'NULL'
+  handler_id:
+    data_type: varchar(64)
+    nullable: true
+    default: 'NULL'
+webhooks_convert:
+  id:
+    data_type: bigint
+    nullable: false
+    default: null
+    __is_pk__: true
+  uuid:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  handler:
+    data_type: varchar(200)
+    nullable: true
+    default: 'NULL'
+  filename:
+    data_type: varchar(500)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: timestamp
+    nullable: false
+    default: CURRENT_TIMESTAMP
+websockets:
+  connection_id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  entity:
+    data_type: text
+    nullable: false
+    default: null
+  date_added:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+xml_settings:
+  id:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+    __is_pk__: true
+  name:
+    data_type: varchar(300)
+    nullable: true
+    default: 'NULL'
+  date_created:
+    data_type: datetime
+    nullable: false
+    default: CURRENT_TIMESTAMP
+  date_updated:
+    data_type: datetime
+    nullable: true
+    default: 'NULL'
+  created_by:
+    data_type: varchar(100)
+    nullable: false
+    default: null
+  updated_by:
+    data_type: varchar(100)
+    nullable: true
+    default: 'NULL'
+  status:
+    data_type: varchar(10)
+    nullable: false
+    default: '''A'''

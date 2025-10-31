@@ -1,3 +1,2 @@
-- "password"
-- "credit_card"
-- "ssn"
+fields:
+  - advertisers.id

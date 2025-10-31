@@ -1,264 +1,214 @@
-# src/orchestrator/router_ai.py
 from __future__ import annotations
-from typing import Any, Dict, List, Optional
 
-import os
-import json
+from typing import Any, Dict, List, Optional, Tuple
+import re
+from datetime import date
 
-from .models import LogicalQueryRequest, Direction, OrderBy  # for validation
-from .date_normalizer import infer_time_range
 
-def _build_enums(config: Any) -> Dict[str, List[str]]:
-    metrics = sorted(list((getattr(config, "metrics", {}) or {}).keys()))
-    dimensions = sorted(list((getattr(config, "dimensions", {}) or {}).keys()))
-    fields = sorted(list(set(dimensions) | set((getattr(config, "fields", {}) or {}).keys())))
-    resolvers = sorted(list((getattr(config, "resolvers", {}) or {}).keys()))
-    return {
-        "metrics": metrics,
-        "dimensions": dimensions,
-        "fields": fields,
-        "resolvers": resolvers,
-    }
+# ---- tiny helpers -----------------------------------------------------------
 
-def _json_schema(enums: Dict[str, List[str]]) -> Dict[str, Any]:
-    return {
-        "type": "object",
-        "properties": {
-            "metrics": {"type": "array", "items": {"enum": enums["metrics"]}, "minItems": 1},
-            "dimensions": {"type": "array", "items": {"enum": enums["dimensions"]}},
-            "filters": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "field": {"enum": enums["fields"]},
-                        "op": {"enum": ["eq","neq","gt","lt","gte","lte","between","in","like"]},
-                        "value": {}
-                    },
-                    "required": ["field","op","value"],
-                    "additionalProperties": False
+def _lc(s: Optional[str]) -> str:
+    return (s or "").lower()
+
+
+def _has(q: str, *needles: str) -> bool:
+    ql = _lc(q)
+    return any(n in ql for n in needles)
+
+
+def _parse_top_limit(q: str) -> Optional[int]:
+    m = re.search(r"\btop[-\s]?(\d+)\b", _lc(q))
+    if m:
+        return int(m.group(1))
+    return None
+
+
+def _last_quarter_today(tz: str) -> Tuple[str, str]:
+    """
+    Previous calendar quarter [start, end) (dates only).
+    Example: if today is 2025-10-21, last quarter -> [2025-07-01, 2025-10-01).
+    """
+    today = date.today()
+    y = today.year
+    q = (today.month - 1) // 3 + 1  # 1..4
+    if q == 1:
+        y -= 1
+        q = 4
+    else:
+        q -= 1
+    start_month = {1: 1, 2: 4, 3: 7, 4: 10}[q]
+    start = date(y, start_month, 1)
+    end = date(y + 1, 1, 1) if q == 4 else date(y, start_month + 3, 1)
+    return (start.isoformat(), end.isoformat())
+
+
+def _exists(name: str, container: Dict[str, Any]) -> bool:
+    return isinstance(container, dict) and name in container
+
+
+def _first_matching(prefix: str, keys: List[str]) -> Optional[str]:
+    for k in keys:
+        if k.startswith(prefix):
+            return k
+    return None
+
+
+def _collect_aliases_for_entity(entity: str, cfg: Any) -> List[str]:
+    fields = list((getattr(cfg, "fields", {}) or {}).keys())
+    dims = list((getattr(cfg, "dimensions", {}) or {}).keys())
+    lookups = list((getattr(cfg, "lookup_projections", {}) or {}).keys())
+    aliases = [a for a in fields + dims + lookups if isinstance(a, str) and a.startswith(f"{entity}.")]
+    # de-dupe keep order
+    seen = set()
+    out: List[str] = []
+    for a in aliases:
+        if a not in seen:
+            seen.add(a)
+            out.append(a)
+    return out
+
+
+# ---- main entry -------------------------------------------------------------
+
+def translate(question: str, cfg: Any, *, tz: str = "Asia/Manila") -> Dict[str, Any]:
+    """
+    Boxed AI translator:
+      - Returns an LQR JSON dict (never SQL)
+      - Picks safe base + metric/dimensions/projections from cfg enums
+      - Respects Phase-1 single-base guardrails
+      - STRICT MODE: if query uses vague metric words (e.g., "performance") and
+        no specific metric exists for the base, return [MISSING_PARAMETER].
+    """
+    q = _lc(question)
+
+    metrics_cfg = getattr(cfg, "metrics", {}) or {}
+    dims_cfg = getattr(cfg, "dimensions", {}) or {}
+    fields_cfg = getattr(cfg, "fields", {}) or {}
+    lookups_cfg = getattr(cfg, "lookup_projections", {}) or {}
+
+    metric_names = list(metrics_cfg.keys())
+    dim_names = list(dims_cfg.keys())
+
+    # ---- Choose base table --------------------------------------------------
+    # "installs" => hosts (install_date semantics); else prefer licenses if present.
+    if _has(q, "install", "installs"):
+        base = "hosts"
+    elif _has(q, "host", "hosts"):
+        base = "hosts"
+    elif _has(q, "license", "licenses"):
+        base = "licenses"
+    else:
+        base = "licenses"
+
+    # ---- Mode: aggregate if "by ..." or "top N" or "performance" -----------
+    wants_aggregate = _has(q, " by ", " per ", " performance") or (_parse_top_limit(q) is not None)
+
+    # ---- Aggregate path -----------------------------------------------------
+    if wants_aggregate:
+        # STRICT: if user said "performance" but no specific metric exists for base, reject.
+        # "Specific" here means: any metric under base that is NOT "<base>.count".
+        if _has(q, "performance"):
+            base_metrics = [m for m in metric_names if m.startswith(f"{base}.")]
+            specific = [m for m in base_metrics if not m.endswith(".count")]
+            if not specific:
+                suggest = base_metrics[:6] or metric_names[:6]
+                return {
+                    "error": "[MISSING_PARAMETER] 'performance' requires a concrete metric for "
+                             f"base '{base}'. Define one in metrics.yaml or specify it explicitly.",
+                    "trace": {"ai": "strict-metric-missing", "base": base},
+                    "suggest": {"metrics": suggest},
                 }
-            },
-            "resolutions": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "target_fk": {"enum": enums["resolvers"]},
-                        "value": {"type": "string"},
-                        "mode": {"enum": ["ilike_contains","ilike_prefix","exact"]},
-                    },
-                    "required": ["target_fk","value"],
-                    "additionalProperties": False
-                }
-            },
-            "order_by": {
-                "type": "array",
-                "items": {
-                    "type": "object",
-                    "properties": {
-                        "field": {"enum": enums["metrics"] + enums["dimensions"]},
-                        "direction": {"enum": ["asc","desc"]}
-                    },
-                    "required": ["field","direction"],
-                    "additionalProperties": False
-                }
-            },
-            "time_range": {
-                "type": "object",
-                "properties": {"start": {"type":"string"}, "end": {"type":"string"}},
-                "required": ["start","end"],
-                "additionalProperties": False
-            },
-            "limit": {"type":"integer"},
-            "error": {"type":"string"},
-            "clarify": {"type":"string"},
-            "suggestions": {"type":"array","items":{"type":"string"}},
-        },
-        "required": [],
-        "additionalProperties": False
-    }
 
-_SYSTEM_PROMPT = (
-    "You are a STRICT router that converts a user's natural-language analytics question into a JSON object "
-    "for a SELECT-only query builder. Return ONLY JSON that conforms to the provided schema. Never output SQL. "
-    "Use ONLY the allowed enums for metrics, dimensions, fields, and resolvers. "
-    "If required info is missing, return an object with 'error':'MISSING_PARAMETER' and a short 'clarify'. "
-    "If a token maps to multiple dimensions on the same table, return 'error':'AMBIGUOUS_REQUEST' with 'suggestions'. "
-    "Do NOT invent fields or metrics."
-)
+        # pick a safe count metric on the base (when allowed)
+        preferred_metric = f"{base}.count"
+        if not _exists(preferred_metric, metrics_cfg):
+            m = _first_matching(f"{base}.", metric_names)
+            if not m:
+                return {"error": "[MISSING_PARAMETER] No metric available for base table",
+                        "trace": {"ai": "no-metric-under-base", "base": base}}
+            preferred_metric = m
 
-_FEW_SHOTS = [
-    {
-        "q": "top 5 dealers by installs in texas last 30 days",
-        "a": {
-            "metrics": ["licenses.count"],
-            "dimensions": ["licenses.dealer_id"],
-            "filters": [{"field":"licenses.state","op":"eq","value":"TX"}],
-            "order_by": [{"field":"licenses.count","direction":"desc"}],
-            "limit": 5
-        }
-    },
-    {
-        "q": "all hosts per state for dealer orion",
-        "a": {
-            "metrics":["hosts.count"],
-            "dimensions":["hosts.state"],
-            "resolutions":[{"target_fk":"hosts.dealer_id","value":"orion"}],
-            "limit": 100
-        }
-    }
-]
+        metrics = [preferred_metric]
 
-def _build_messages(nl_text: str, tz: str, schema: Dict[str, Any]) -> list[Dict[str, str]]:
-    shots = "\n---\n".join([f"Q: {s['q']}\nA: {json.dumps(s['a'])}" for s in _FEW_SHOTS])
-    user = f"Question: {nl_text}\nTimezone: {tz}\nReturn JSON only."
-    return [
-        {"role": "system", "content": _SYSTEM_PROMPT + "\nJSON schema will be provided as a tool/function."},
-        {"role": "user", "content": shots},
-        {"role": "user", "content": user},
-    ]
+        # dimension guesses from hints; keep within the base table
+        dims: List[str] = []
+        if base == "hosts" and _has(q, "store"):
+            # "store" → prefer hosts.name if modeled as a dimension; else hosts.host_id
+            cand = "hosts.name"
+            dims.append(cand if cand in dim_names else "hosts.host_id")
 
-def _validate_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Strict validation using our Pydantic LogicalQueryRequest. We allow partials:
-    - If time_range missing but dates mentioned, the orchestrator/date_normalizer will fill.
-    - If limit missing, downstream will inject default 100.
-    """
-    # Coerce to LogicalQueryRequest; this raises on any off-allowlist / wrong shape
-    lqr = LogicalQueryRequest(**{
-        "metrics": payload.get("metrics") or [],
-        "dimensions": payload.get("dimensions") or [],
-        "filters": payload.get("filters") or [],
-        "order_by": payload.get("order_by") or [],
-        "limit": payload.get("limit"),
-        "time_range": payload.get("time_range"),
-        "resolutions": payload.get("resolutions") or [],
-    })
-    # return as dict for orchestrator to pass to AST
-    return lqr.model_dump()
+        if base == "licenses" and _has(q, "partner"):
+            # "partner" → safe Phase-1 grouping: licenses.dealer_id
+            cand = "licenses.dealer_id"
+            dims.append(cand if cand in dim_names else "licenses.dealer_id")
 
-def translate(nl_text: str, config: Any, *, tz: str = "Asia/Manila", provider: Optional[str] = None) -> Dict[str, Any]:
-    """
-    Translate NL -> LogicalQueryRequest JSON using an LLM (JSON-only), with strict schema/enums.
-    Providers:
-      - openai (function-calling)
-      - gemini (application/json constrained)
-    Auto-picks provider from ROUTER_PROVIDER env if not specified.
-    Never returns SQL. Never blocks pipeline: emits a clear error on failure.
-    """
-    enums = _build_enums(config)
-    schema = _json_schema(enums)
-    messages = _build_messages(nl_text, tz, schema)
+        if not dims:
+            # generic fallback: <base>.<singular>_id if available, else first dimension
+            pk = f"{base}.{base[:-1]}_id" if base.endswith("s") else f"{base}.{base}_id"
+            dims.append(pk if pk in dim_names else (dim_names[0] if dim_names else pk))
 
-    prov = (provider or os.getenv("ROUTER_PROVIDER") or "openai").lower().strip()
-
-    # ---------- OpenAI path ----------
-    if prov == "openai":
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            return {
-                "error": "[MISSING_PARAMETER] AI router not available (OPENAI_API_KEY not set).",
-                "trace": {"ai": "no_api_key", "provider": "openai"},
-            }
-        try:
-            import openai  # type: ignore
-        except Exception:
-            return {
-                "error": "[MISSING_PARAMETER] AI router not available (openai sdk not installed).",
-                "trace": {"ai": "unavailable", "provider": "openai"},
-            }
-
-        try:
-            client = openai.OpenAI() if hasattr(openai, "OpenAI") else None
-            if client:
-                resp = client.chat.completions.create(
-                    model=os.getenv("OPENAI_ROUTER_MODEL", "gpt-4o-mini"),
-                    temperature=0,
-                    messages=messages,
-                    tools=[{
-                        "type": "function",
-                        "function": {
-                            "name": "produce_logical_query",
-                            "description": "Return a LogicalQueryRequest JSON for the query builder.",
-                            "parameters": schema,
-                        },
-                    }],
-                    tool_choice={"type": "function", "function": {"name": "produce_logical_query"}},
-                )
-                choice = resp.choices[0]
-                tool_call = choice.message.tool_calls[0]
-                args = json.loads(tool_call.function.arguments or "{}")
+        # time window
+        filters: List[Dict[str, Any]] = []
+        tr = None
+        if _has(q, "last quarter"):
+            start, end = _last_quarter_today(tz)
+            if base == "hosts" and _has(q, "install"):
+                # Use explicit install_date filters to force the correct date basis
+                filters.append({"field": "hosts.install_date", "op": "gte", "value": start})
+                filters.append({"field": "hosts.install_date", "op": "lt", "value": end})
+                tr = None
             else:
-                # legacy SDK
-                resp = openai.ChatCompletion.create(
-                    model=os.getenv("OPENAI_ROUTER_MODEL", "gpt-4o-mini"),
-                    temperature=0,
-                    messages=messages,
-                    functions=[{
-                        "name": "produce_logical_query",
-                        "description": "Return a LogicalQueryRequest JSON for the query builder.",
-                        "parameters": schema,
-                    }],
-                    function_call={"name": "produce_logical_query"},
-                )
-                args = json.loads(resp["choices"][0]["message"]["function_call"]["arguments"] or "{}")
+                tr = {"start": start, "end": end}
 
-            if args.get("error"):
-                return {
-                    "error": f"[{args.get('error')}] {args.get('clarify','')}".strip(),
-                    "trace": {"ai": "returned-error", "provider": "openai", "suggestions": args.get("suggestions")},
-                }
+        # order/limit
+        order_by = [{"field": metrics[0], "direction": "desc"}] if _has(q, "top", "performance") else []
+        limit = _parse_top_limit(q) or 100
 
-            lqr_dict = _validate_payload(args)
-            return {"lqr": lqr_dict, "trace": {"ai": "ok", "router": "openai"}}
+        lqr = {
+            "metrics": metrics,
+            "dimensions": dims,
+            "filters": filters,
+            "order_by": order_by,
+            "limit": limit,
+            "time_range": tr,
+            "projections": [],
+            "resolutions": [],
+        }
+        return {"lqr": lqr, "trace": {"ai": "aggregate-heuristic", "base": base}}
 
-        except Exception as e:
-            return {"error": f"[MISSING_PARAMETER] AI router failed: {e}", "trace": {"ai": "exception", "provider": "openai"}}
+    # ---- Detail path --------------------------------------------------------
+    # If user says "show/list" without a "by", prefer detail with simple projections
+    aliases = _collect_aliases_for_entity(base, cfg)
 
-    # ---------- Gemini path ----------
-    elif prov == "gemini":
-        api_key = os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            return {
-                "error": "[MISSING_PARAMETER] AI router not available (GEMINI_API_KEY not set).",
-                "trace": {"ai": "no_api_key", "provider": "gemini"},
-            }
-        try:
-            import google.generativeai as genai  # type: ignore
-            genai.configure(api_key=api_key)
-        except Exception:
-            return {
-                "error": "[MISSING_PARAMETER] AI router not available (google-generativeai not installed).",
-                "trace": {"ai": "unavailable", "provider": "gemini"},
-            }
+    # choose a minimal, safe projection set: <base>.<pk> and a name-like field
+    pk = f"{base}.{base[:-1]}_id" if base.endswith("s") else f"{base}.{base}_id"
+    proj: List[str] = []
+    if pk in aliases:
+        proj.append(pk)
+    else:
+        # fallback: any *_id on base
+        any_id = next((a for a in aliases if a.split(".")[-1].endswith("_id")), None)
+        if any_id:
+            proj.append(any_id)
 
-        try:
-            # Gemini doesn't have the same "tools" API; we embed the schema and demand JSON-only output.
-            model = genai.GenerativeModel(os.getenv("GEMINI_ROUTER_MODEL", "gemini-1.5-pro"))
-            payload = {
-                "system": _SYSTEM_PROMPT + "\nReturn ONLY JSON per the schema below.\n" +
-                        "SCHEMA:\n" + json.dumps(schema, ensure_ascii=False),
-                "user": f"Question: {nl_text}\nTimezone: {tz}\nReturn JSON only."
-            }
-            resp = model.generate_content(
-                [payload["system"], payload["user"]],
-                generation_config={"temperature": 0, "response_mime_type": "application/json"},
-            )
-            text = getattr(resp, "text", None)
-            args = json.loads(text or "{}")
+    # name-ish alias preferences
+    for cand in (f"{base}.name", f"{base}.host_name", f"{base}.business_name"):
+        if cand in aliases and cand not in proj:
+            proj.append(cand)
+            break
 
-            if args.get("error"):
-                return {
-                    "error": f"[{args.get('error')}] {args.get('clarify','')}".strip(),
-                    "trace": {"ai": "returned-error", "provider": "gemini", "suggestions": args.get("suggestions")},
-                }
+    # Limit: leading number like "10 hosts ..." else 100
+    m = re.match(r"^\s*(\d+)\b", q or "")
+    limit = int(m.group(1)) if m else 100
 
-            lqr_dict = _validate_payload(args)
-            return {"lqr": lqr_dict, "trace": {"ai": "ok", "router": "gemini"}}
-
-        except Exception as e:
-            return {"error": f"[MISSING_PARAMETER] AI router failed: {e}", "trace": {"ai": "exception", "provider": "gemini"}}
-
-    # ---------- Unknown provider ----------
-    return {"error": "[MISSING_PARAMETER] AI router not available (unknown provider).", "trace": {"ai": "unknown"}}
+    lqr = {
+        "metrics": [],
+        "projections": proj or [pk],  # ensure non-empty for detail
+        "dimensions": [],
+        "filters": [],
+        "order_by": [],
+        "limit": limit,
+        "time_range": None,
+        "resolutions": [],
+    }
+    return {"lqr": lqr, "trace": {"ai": "detail-heuristic", "base": base}}

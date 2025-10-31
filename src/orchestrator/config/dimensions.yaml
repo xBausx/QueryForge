@@ -1,36 +1,4080 @@
-# Host attributes
-hosts.city: hosts.city
-hosts.state: hosts.state
-hosts.region: hosts.region
-hosts.country: hosts.country
-hosts.status: hosts.status
-hosts.category: hosts.category
-hosts.dealer_id: hosts.dealer_id
-hosts.programmatic_id: hosts.programmatic_id
-hosts.install_date: hosts.install_date
-hosts.date_created: hosts.date_created
-hosts.date_updated: hosts.date_updated
-
-# Dealer attributes
-dealers.dealer_id: dealers.dealer_id
-dealers.business_name: dealers.business_name
-dealers.city: dealers.city
-dealers.state: dealers.state
-dealers.region: dealers.region
-dealers.dealer_type: dealers.dealer_type
-dealers.status: dealers.status
-dealers.start_date: dealers.start_date
-dealers.date_created: dealers.date_created
-dealers.date_updated: dealers.date_updated
-
-# License attributes
-licenses.dealer_id: licenses.dealer_id
-licenses.host_id: licenses.host_id
-licenses.is_registered: licenses.is_registered
-licenses.is_activated: licenses.is_activated
-licenses.player_status: licenses.player_status
-licenses.pi_status: licenses.pi_status
-licenses.display_status: licenses.display_status
-licenses.install_date: licenses.install_date
-licenses.date_created: licenses.date_created
-licenses.date_updated: licenses.date_updated
+activities.activity_code:
+  table: activities
+  column: activity_code
+  type: string
+activities.activity_description:
+  table: activities
+  column: activity_description
+  type: string
+activities.date_created:
+  table: activities
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+activities.date_updated:
+  table: activities
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+activity_logs.activity_log_id:
+  table: activity_logs
+  column: activity_log_id
+  type: string
+activity_logs.license_id:
+  table: activity_logs
+  column: license_id
+  type: string
+activity_logs.activity_code:
+  table: activity_logs
+  column: activity_code
+  type: string
+activity_logs.date_created:
+  table: activity_logs
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+activity_logs.date_updated:
+  table: activity_logs
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+activity_logs.initiated_by:
+  table: activity_logs
+  column: initiated_by
+  type: string
+advertiser_activity_logs.activity_log_id:
+  table: advertiser_activity_logs
+  column: activity_log_id
+  type: string
+advertiser_activity_logs.activity_code:
+  table: advertiser_activity_logs
+  column: activity_code
+  type: string
+advertiser_activity_logs.date_created:
+  table: advertiser_activity_logs
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+advertiser_activity_logs.date_updated:
+  table: advertiser_activity_logs
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+advertiser_activity_logs.initiated_by:
+  table: advertiser_activity_logs
+  column: initiated_by
+  type: string
+advertiser_activity_logs.owner_id:
+  table: advertiser_activity_logs
+  column: owner_id
+  type: string
+advertiser_deleted_contents_for_logs.content_id:
+  table: advertiser_deleted_contents_for_logs
+  column: content_id
+  type: string
+advertiser_deleted_contents_for_logs.title:
+  table: advertiser_deleted_contents_for_logs
+  column: title
+  type: string
+advertiser_deleted_contents_for_logs.file_name:
+  table: advertiser_deleted_contents_for_logs
+  column: file_name
+  type: string
+advertisers.id:
+  table: advertisers
+  column: id
+  type: string
+advertisers.dealer_id:
+  table: advertisers
+  column: dealer_id
+  type: string
+advertisers.user_id:
+  table: advertisers
+  column: user_id
+  type: string
+advertisers.advertiser_id:
+  table: advertisers
+  column: advertiser_id
+  type: string
+advertisers.name:
+  table: advertisers
+  column: name
+  type: string
+advertisers.region:
+  table: advertisers
+  column: region
+  type: string
+advertisers.state:
+  table: advertisers
+  column: state
+  type: string
+advertisers.status:
+  table: advertisers
+  column: status
+  type: string
+advertisers.date_created:
+  table: advertisers
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+advertisers.date_updated:
+  table: advertisers
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+advertisers.created_by:
+  table: advertisers
+  column: created_by
+  type: string
+advertisers.updated_by:
+  table: advertisers
+  column: updated_by
+  type: string
+advertisers.latitude:
+  table: advertisers
+  column: latitude
+  type: string
+advertisers.longitude:
+  table: advertisers
+  column: longitude
+  type: string
+advertisers.city:
+  table: advertisers
+  column: city
+  type: string
+advertisers.postal_code:
+  table: advertisers
+  column: postal_code
+  type: string
+advertisers.address:
+  table: advertisers
+  column: address
+  type: string
+advertisers.category:
+  table: advertisers
+  column: category
+  type: string
+advertisers.logo:
+  table: advertisers
+  column: logo
+  type: string
+blacklisted_contents.blacklisted_content_id:
+  table: blacklisted_contents
+  column: blacklisted_content_id
+  type: string
+blacklisted_contents.license_id:
+  table: blacklisted_contents
+  column: license_id
+  type: string
+blacklisted_contents.content_id:
+  table: blacklisted_contents
+  column: content_id
+  type: string
+blacklisted_contents.playlist_content_id:
+  table: blacklisted_contents
+  column: playlist_content_id
+  type: string
+blacklisted_contents.date_created:
+  table: blacklisted_contents
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+blacklisted_contents.date_updated:
+  table: blacklisted_contents
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+categories.category_id:
+  table: categories
+  column: category_id
+  type: string
+categories.gcid:
+  table: categories
+  column: gcid
+  type: string
+categories.category:
+  table: categories
+  column: category
+  type: string
+categories.general_category:
+  table: categories
+  column: general_category
+  type: string
+cities.city:
+  table: cities
+  column: city
+  type: string
+cities.state:
+  table: cities
+  column: state
+  type: string
+cities_state_data.city:
+  table: cities_state_data
+  column: city
+  type: string
+cities_state_data.state:
+  table: cities_state_data
+  column: state
+  type: string
+cities_state_data.abbreviation:
+  table: cities_state_data
+  column: abbreviation
+  type: string
+cities_state_data.region:
+  table: cities_state_data
+  column: region
+  type: string
+cities_state_data.country:
+  table: cities_state_data
+  column: country
+  type: string
+cities_state_data.date_created:
+  table: cities_state_data
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+cities_state_data.date_updated:
+  table: cities_state_data
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+cities_state_data.created_by:
+  table: cities_state_data
+  column: created_by
+  type: string
+cities_state_data.updated_by:
+  table: cities_state_data
+  column: updated_by
+  type: string
+cities_state_data.status:
+  table: cities_state_data
+  column: status
+  type: string
+content_history_logs.playlist_content_id:
+  table: content_history_logs
+  column: playlist_content_id
+  type: string
+content_history_logs.content_id:
+  table: content_history_logs
+  column: content_id
+  type: string
+content_history_logs.playlist_id:
+  table: content_history_logs
+  column: playlist_id
+  type: string
+content_history_logs.action:
+  table: content_history_logs
+  column: action
+  type: string
+content_history_logs.log_date:
+  table: content_history_logs
+  column: log_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+content_history_logs.user_id:
+  table: content_history_logs
+  column: user_id
+  type: string
+content_play_logs.log_id:
+  table: content_play_logs
+  column: log_id
+  type: string
+content_play_logs.license_id:
+  table: content_play_logs
+  column: license_id
+  type: string
+content_play_logs.content_id:
+  table: content_play_logs
+  column: content_id
+  type: string
+content_play_logs.date_created:
+  table: content_play_logs
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+content_play_logs.log_date:
+  table: content_play_logs
+  column: log_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+content_plays_daily.log_id:
+  table: content_plays_daily
+  column: log_id
+  type: string
+content_plays_daily.playlist_content_id:
+  table: content_plays_daily
+  column: playlist_content_id
+  type: string
+content_plays_daily.license_id:
+  table: content_plays_daily
+  column: license_id
+  type: string
+content_plays_daily.content_id:
+  table: content_plays_daily
+  column: content_id
+  type: string
+content_plays_daily.log_date:
+  table: content_plays_daily
+  column: log_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+content_plays_daily.playlist_id:
+  table: content_plays_daily
+  column: playlist_id
+  type: string
+content_plays_daily_2024_july_august.log_id:
+  table: content_plays_daily_2024_july_august
+  column: log_id
+  type: string
+content_plays_daily_2024_july_august.playlist_content_id:
+  table: content_plays_daily_2024_july_august
+  column: playlist_content_id
+  type: string
+content_plays_daily_2024_july_august.license_id:
+  table: content_plays_daily_2024_july_august
+  column: license_id
+  type: string
+content_plays_daily_2024_july_august.content_id:
+  table: content_plays_daily_2024_july_august
+  column: content_id
+  type: string
+content_plays_daily_2024_july_august.log_date:
+  table: content_plays_daily_2024_july_august
+  column: log_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+content_plays_daily_2024_july_august.playlist_id:
+  table: content_plays_daily_2024_july_august
+  column: playlist_id
+  type: string
+content_plays_daily_logs.log_id:
+  table: content_plays_daily_logs
+  column: log_id
+  type: string
+content_plays_daily_logs.playlist_content_id:
+  table: content_plays_daily_logs
+  column: playlist_content_id
+  type: string
+content_plays_daily_logs.license_id:
+  table: content_plays_daily_logs
+  column: license_id
+  type: string
+content_plays_daily_logs.content_id:
+  table: content_plays_daily_logs
+  column: content_id
+  type: string
+content_plays_daily_logs.log_date:
+  table: content_plays_daily_logs
+  column: log_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+content_plays_daily_logs.playlist_id:
+  table: content_plays_daily_logs
+  column: playlist_id
+  type: string
+content_plays_daily_migration.log_id:
+  table: content_plays_daily_migration
+  column: log_id
+  type: string
+content_plays_daily_migration.playlist_content_id:
+  table: content_plays_daily_migration
+  column: playlist_content_id
+  type: string
+content_plays_daily_migration.license_id:
+  table: content_plays_daily_migration
+  column: license_id
+  type: string
+content_plays_daily_migration.content_id:
+  table: content_plays_daily_migration
+  column: content_id
+  type: string
+content_plays_daily_migration.log_date:
+  table: content_plays_daily_migration
+  column: log_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+content_plays_daily_migration.playlist_id:
+  table: content_plays_daily_migration
+  column: playlist_id
+  type: string
+content_plays_daily_migration_params.param_id:
+  table: content_plays_daily_migration_params
+  column: param_id
+  type: string
+content_plays_daily_migration_params.from_date:
+  table: content_plays_daily_migration_params
+  column: from_date
+  type: string
+content_plays_daily_migration_params.to_date:
+  table: content_plays_daily_migration_params
+  column: to_date
+  type: string
+content_plays_daily_replicate.log_id:
+  table: content_plays_daily_replicate
+  column: log_id
+  type: string
+content_plays_daily_replicate.playlist_content_id:
+  table: content_plays_daily_replicate
+  column: playlist_content_id
+  type: string
+content_plays_daily_replicate.license_id:
+  table: content_plays_daily_replicate
+  column: license_id
+  type: string
+content_plays_daily_replicate.content_id:
+  table: content_plays_daily_replicate
+  column: content_id
+  type: string
+content_plays_daily_replicate.log_date:
+  table: content_plays_daily_replicate
+  column: log_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+content_plays_daily_replicate.playlist_id:
+  table: content_plays_daily_replicate
+  column: playlist_id
+  type: string
+content_plays_hourly.log_id:
+  table: content_plays_hourly
+  column: log_id
+  type: string
+content_plays_hourly.playlist_content_id:
+  table: content_plays_hourly
+  column: playlist_content_id
+  type: string
+content_plays_hourly.license_id:
+  table: content_plays_hourly
+  column: license_id
+  type: string
+content_plays_hourly.content_id:
+  table: content_plays_hourly
+  column: content_id
+  type: string
+content_plays_hourly.log_date:
+  table: content_plays_hourly
+  column: log_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+content_plays_hourly.hour:
+  table: content_plays_hourly
+  column: hour
+  type: string
+content_plays_hourly.playlist_id:
+  table: content_plays_hourly
+  column: playlist_id
+  type: string
+contents.content_id:
+  table: contents
+  column: content_id
+  type: string
+contents.dealer_id:
+  table: contents
+  column: dealer_id
+  type: string
+contents.host_id:
+  table: contents
+  column: host_id
+  type: string
+contents.advertiser_id:
+  table: contents
+  column: advertiser_id
+  type: string
+contents.file_name:
+  table: contents
+  column: file_name
+  type: string
+contents.url:
+  table: contents
+  column: url
+  type: string
+contents.file_type:
+  table: contents
+  column: file_type
+  type: string
+contents.embedded_script:
+  table: contents
+  column: embedded_script
+  type: string
+contents.handler_id:
+  table: contents
+  column: handler_id
+  type: string
+contents.date_created:
+  table: contents
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+contents.uuid:
+  table: contents
+  column: uuid
+  type: string
+contents.file_size:
+  table: contents
+  column: file_size
+  type: string
+contents.filestack_uuid:
+  table: contents
+  column: filestack_uuid
+  type: string
+contents.filestack_status:
+  table: contents
+  column: filestack_status
+  type: string
+contents.created_by:
+  table: contents
+  column: created_by
+  type: string
+contents.description:
+  table: contents
+  column: description
+  type: string
+contents.title:
+  table: contents
+  column: title
+  type: string
+contents.classification:
+  table: contents
+  column: classification
+  type: string
+contents.prefix:
+  table: contents
+  column: prefix
+  type: string
+contents.ref_dealer_id:
+  table: contents
+  column: ref_dealer_id
+  type: string
+contents.ref_content_id:
+  table: contents
+  column: ref_content_id
+  type: string
+contents.feed_id:
+  table: contents
+  column: feed_id
+  type: string
+contents.date_updated:
+  table: contents
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+contents.deleted_at:
+  table: contents
+  column: deleted_at
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+contents.deleted_by:
+  table: contents
+  column: deleted_by
+  type: string
+contents.deleted_reason:
+  table: contents
+  column: deleted_reason
+  type: string
+countries.name:
+  table: countries
+  column: name
+  type: string
+countries.iso3:
+  table: countries
+  column: iso3
+  type: string
+countries.numeric_code:
+  table: countries
+  column: numeric_code
+  type: string
+countries.iso2:
+  table: countries
+  column: iso2
+  type: string
+countries.phonecode:
+  table: countries
+  column: phonecode
+  type: string
+countries.capital:
+  table: countries
+  column: capital
+  type: string
+countries.currency:
+  table: countries
+  column: currency
+  type: string
+countries.currency_name:
+  table: countries
+  column: currency_name
+  type: string
+countries.currency_symbol:
+  table: countries
+  column: currency_symbol
+  type: string
+countries.tld:
+  table: countries
+  column: tld
+  type: string
+countries.native:
+  table: countries
+  column: native
+  type: string
+countries.region:
+  table: countries
+  column: region
+  type: string
+countries.subregion:
+  table: countries
+  column: subregion
+  type: string
+countries.timezones:
+  table: countries
+  column: timezones
+  type: string
+countries.translations:
+  table: countries
+  column: translations
+  type: string
+countries.emoji:
+  table: countries
+  column: emoji
+  type: string
+countries.emojiU:
+  table: countries
+  column: emojiU
+  type: string
+countries.created_at:
+  table: countries
+  column: created_at
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+countries.updated_at:
+  table: countries
+  column: updated_at
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+countries.wikiDataId:
+  table: countries
+  column: wikiDataId
+  type: string
+dealer_activity_logs.activity_log_id:
+  table: dealer_activity_logs
+  column: activity_log_id
+  type: string
+dealer_activity_logs.activity_code:
+  table: dealer_activity_logs
+  column: activity_code
+  type: string
+dealer_activity_logs.date_created:
+  table: dealer_activity_logs
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealer_activity_logs.date_updated:
+  table: dealer_activity_logs
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealer_activity_logs.initiated_by:
+  table: dealer_activity_logs
+  column: initiated_by
+  type: string
+dealer_activity_logs.owner_id:
+  table: dealer_activity_logs
+  column: owner_id
+  type: string
+dealer_address_books.dealer_address_book_id:
+  table: dealer_address_books
+  column: dealer_address_book_id
+  type: string
+dealer_address_books.dealer_id:
+  table: dealer_address_books
+  column: dealer_id
+  type: string
+dealer_address_books.address:
+  table: dealer_address_books
+  column: address
+  type: string
+dealer_address_books.country:
+  table: dealer_address_books
+  column: country
+  type: string
+dealer_address_books.city:
+  table: dealer_address_books
+  column: city
+  type: string
+dealer_address_books.state:
+  table: dealer_address_books
+  column: state
+  type: string
+dealer_address_books.zip:
+  table: dealer_address_books
+  column: zip
+  type: string
+dealer_address_books.date_created:
+  table: dealer_address_books
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealer_address_books.date_updated:
+  table: dealer_address_books
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealer_address_books.created_by:
+  table: dealer_address_books
+  column: created_by
+  type: string
+dealer_address_books.updated_by:
+  table: dealer_address_books
+  column: updated_by
+  type: string
+dealer_address_books.status:
+  table: dealer_address_books
+  column: status
+  type: string
+dealer_admins.id:
+  table: dealer_admins
+  column: id
+  type: string
+dealer_admins.dealer_id:
+  table: dealer_admins
+  column: dealer_id
+  type: string
+dealer_admins.user_id:
+  table: dealer_admins
+  column: user_id
+  type: string
+dealer_admins.date_created:
+  table: dealer_admins
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealer_admins.created_by:
+  table: dealer_admins
+  column: created_by
+  type: string
+dealer_admins.updated_by:
+  table: dealer_admins
+  column: updated_by
+  type: string
+dealer_admins.date_updated:
+  table: dealer_admins
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealer_admins.status:
+  table: dealer_admins
+  column: status
+  type: string
+dealer_contract_details.dealer_contract_id:
+  table: dealer_contract_details
+  column: dealer_contract_id
+  type: string
+dealer_contract_details.dealer_id:
+  table: dealer_contract_details
+  column: dealer_id
+  type: string
+dealer_contract_details.eff_date:
+  table: dealer_contract_details
+  column: eff_date
+  type: string
+dealer_contract_details.minutes:
+  table: dealer_contract_details
+  column: minutes
+  type: string
+dealer_contract_details.start_up:
+  table: dealer_contract_details
+  column: start_up
+  type: string
+dealer_contract_details.13th_month:
+  table: dealer_contract_details
+  column: 13th_month
+  type: string
+dealer_contract_details.19th_month:
+  table: dealer_contract_details
+  column: 19th_month
+  type: string
+dealer_contract_details.25th_month:
+  table: dealer_contract_details
+  column: 25th_month
+  type: string
+dealer_contract_details.31st_month:
+  table: dealer_contract_details
+  column: 31st_month
+  type: string
+dealer_contract_details.date_created:
+  table: dealer_contract_details
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealer_contract_details.date_updated:
+  table: dealer_contract_details
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealer_contract_details.created_by:
+  table: dealer_contract_details
+  column: created_by
+  type: string
+dealer_contract_details.updated_by:
+  table: dealer_contract_details
+  column: updated_by
+  type: string
+dealer_contract_details.status:
+  table: dealer_contract_details
+  column: status
+  type: string
+dealer_templates.dealer_template_id:
+  table: dealer_templates
+  column: dealer_template_id
+  type: string
+dealer_templates.dealer_id:
+  table: dealer_templates
+  column: dealer_id
+  type: string
+dealer_templates.template_id:
+  table: dealer_templates
+  column: template_id
+  type: string
+dealer_unused_contents.dealer_unused_content_id:
+  table: dealer_unused_contents
+  column: dealer_unused_content_id
+  type: string
+dealer_unused_contents.dealer_id:
+  table: dealer_unused_contents
+  column: dealer_id
+  type: string
+dealer_unused_contents.content_id:
+  table: dealer_unused_contents
+  column: content_id
+  type: string
+dealer_unused_contents.date_created:
+  table: dealer_unused_contents
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealer_values.dealer_value_id:
+  table: dealer_values
+  column: dealer_value_id
+  type: string
+dealer_values.dealer_id:
+  table: dealer_values
+  column: dealer_id
+  type: string
+dealer_values.created_date:
+  table: dealer_values
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealer_values.updated_date:
+  table: dealer_values
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealer_values.email:
+  table: dealer_values
+  column: email
+  type: string
+dealer_values.stripe_id:
+  table: dealer_values
+  column: stripe_id
+  type: string
+dealers.dealer_id:
+  table: dealers
+  column: dealer_id
+  type: string
+dealers.generated_ID:
+  table: dealers
+  column: generated_ID
+  type: string
+dealers.business_name:
+  table: dealers
+  column: business_name
+  type: string
+dealers.contact_person:
+  table: dealers
+  column: contact_person
+  type: string
+dealers.contact_number:
+  table: dealers
+  column: contact_number
+  type: string
+dealers.region:
+  table: dealers
+  column: region
+  type: string
+dealers.state:
+  table: dealers
+  column: state
+  type: string
+dealers.city:
+  table: dealers
+  column: city
+  type: string
+dealers.user_id:
+  table: dealers
+  column: user_id
+  type: string
+dealers.date_created:
+  table: dealers
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealers.date_updated:
+  table: dealers
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealers.created_by:
+  table: dealers
+  column: created_by
+  type: string
+dealers.updated_by:
+  table: dealers
+  column: updated_by
+  type: string
+dealers.status:
+  table: dealers
+  column: status
+  type: string
+dealers.address:
+  table: dealers
+  column: address
+  type: string
+dealers.zip:
+  table: dealers
+  column: zip
+  type: string
+dealers.dealer_type:
+  table: dealers
+  column: dealer_type
+  type: string
+dealers.dealer_id_alias:
+  table: dealers
+  column: dealer_id_alias
+  type: string
+dealers.start_date:
+  table: dealers
+  column: start_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealers.logo:
+  table: dealers
+  column: logo
+  type: string
+dealers_contract_files.dealers_contract_file_id:
+  table: dealers_contract_files
+  column: dealers_contract_file_id
+  type: string
+dealers_contract_files.dealer_id:
+  table: dealers_contract_files
+  column: dealer_id
+  type: string
+dealers_contract_files.s3_filename:
+  table: dealers_contract_files
+  column: s3_filename
+  type: string
+dealers_contract_files.filename:
+  table: dealers_contract_files
+  column: filename
+  type: string
+dealers_contract_files.created_date:
+  table: dealers_contract_files
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealers_contract_files.updated_date:
+  table: dealers_contract_files
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealers_new.dealer_id:
+  table: dealers_new
+  column: dealer_id
+  type: string
+dealers_new.generated_ID:
+  table: dealers_new
+  column: generated_ID
+  type: string
+dealers_new.business_name:
+  table: dealers_new
+  column: business_name
+  type: string
+dealers_new.contact_person:
+  table: dealers_new
+  column: contact_person
+  type: string
+dealers_new.contact_number:
+  table: dealers_new
+  column: contact_number
+  type: string
+dealers_new.region:
+  table: dealers_new
+  column: region
+  type: string
+dealers_new.state:
+  table: dealers_new
+  column: state
+  type: string
+dealers_new.city:
+  table: dealers_new
+  column: city
+  type: string
+dealers_new.user_id:
+  table: dealers_new
+  column: user_id
+  type: string
+dealers_new.date_created:
+  table: dealers_new
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealers_new.date_updated:
+  table: dealers_new
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealers_new.created_by:
+  table: dealers_new
+  column: created_by
+  type: string
+dealers_new.updated_by:
+  table: dealers_new
+  column: updated_by
+  type: string
+dealers_new.status:
+  table: dealers_new
+  column: status
+  type: string
+dealers_new.address:
+  table: dealers_new
+  column: address
+  type: string
+dealers_new.zip:
+  table: dealers_new
+  column: zip
+  type: string
+dealers_new.dealer_type:
+  table: dealers_new
+  column: dealer_type
+  type: string
+dealers_new.dealer_id_alias:
+  table: dealers_new
+  column: dealer_id_alias
+  type: string
+dealers_new.start_date:
+  table: dealers_new
+  column: start_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealers_new.logo:
+  table: dealers_new
+  column: logo
+  type: string
+dealers_territory_files.dealers_territory_file_id:
+  table: dealers_territory_files
+  column: dealers_territory_file_id
+  type: string
+dealers_territory_files.dealer_id:
+  table: dealers_territory_files
+  column: dealer_id
+  type: string
+dealers_territory_files.s3_filename:
+  table: dealers_territory_files
+  column: s3_filename
+  type: string
+dealers_territory_files.filename:
+  table: dealers_territory_files
+  column: filename
+  type: string
+dealers_territory_files.created_date:
+  table: dealers_territory_files
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dealers_territory_files.updated_date:
+  table: dealers_territory_files
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dma.dma_id:
+  table: dma
+  column: dma_id
+  type: string
+dma.zip:
+  table: dma
+  column: zip
+  type: string
+dma.city:
+  table: dma
+  column: city
+  type: string
+dma.state:
+  table: dma
+  column: state
+  type: string
+dma.county:
+  table: dma
+  column: county
+  type: string
+dma.fips:
+  table: dma
+  column: fips
+  type: string
+dma.timezone:
+  table: dma
+  column: timezone
+  type: string
+dma.area_code:
+  table: dma
+  column: area_code
+  type: string
+dma.country:
+  table: dma
+  column: country
+  type: string
+dma.latitude:
+  table: dma
+  column: latitude
+  type: string
+dma.longitude:
+  table: dma
+  column: longitude
+  type: string
+dma.utc:
+  table: dma
+  column: utc
+  type: string
+dma.dma_name:
+  table: dma
+  column: dma_name
+  type: string
+dma.dma_code:
+  table: dma
+  column: dma_code
+  type: string
+dma.created_date:
+  table: dma
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+dma.updated_date:
+  table: dma
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+feed_fillers.feed_filler_id:
+  table: feed_fillers
+  column: feed_filler_id
+  type: string
+feed_fillers.feed_id:
+  table: feed_fillers
+  column: feed_id
+  type: string
+feed_fillers.folder_name:
+  table: feed_fillers
+  column: folder_name
+  type: string
+feed_fillers.date_created:
+  table: feed_fillers
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+feed_global_settings.feed_global_setting_id:
+  table: feed_global_settings
+  column: feed_global_setting_id
+  type: string
+feed_global_settings.feed_id:
+  table: feed_global_settings
+  column: feed_id
+  type: string
+feed_global_settings.overlay:
+  table: feed_global_settings
+  column: overlay
+  type: string
+feed_global_settings.font_family:
+  table: feed_global_settings
+  column: font_family
+  type: string
+feed_global_settings.font_color:
+  table: feed_global_settings
+  column: font_color
+  type: string
+feed_global_settings.banner_image:
+  table: feed_global_settings
+  column: banner_image
+  type: string
+feed_global_settings.animation:
+  table: feed_global_settings
+  column: animation
+  type: string
+feed_global_settings.text_align:
+  table: feed_global_settings
+  column: text_align
+  type: string
+feed_global_settings.headline_background:
+  table: feed_global_settings
+  column: headline_background
+  type: string
+feed_global_settings.headline_color:
+  table: feed_global_settings
+  column: headline_color
+  type: string
+feed_global_settings.date_created:
+  table: feed_global_settings
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+feed_global_settings.status:
+  table: feed_global_settings
+  column: status
+  type: string
+feed_news.feed_news_id:
+  table: feed_news
+  column: feed_news_id
+  type: string
+feed_news.feed_id:
+  table: feed_news
+  column: feed_id
+  type: string
+feed_news.rss_feed_url:
+  table: feed_news
+  column: rss_feed_url
+  type: string
+feed_news.rss_feed_data:
+  table: feed_news
+  column: rss_feed_data
+  type: string
+feed_news.results:
+  table: feed_news
+  column: results
+  type: string
+feed_news.loop_cycle:
+  table: feed_news
+  column: loop_cycle
+  type: string
+feed_news.time:
+  table: feed_news
+  column: time
+  type: string
+feed_news.font_color:
+  table: feed_news
+  column: font_color
+  type: string
+feed_news.font_size:
+  table: feed_news
+  column: font_size
+  type: string
+feed_news.margin_top:
+  table: feed_news
+  column: margin_top
+  type: string
+feed_news.margin_left:
+  table: feed_news
+  column: margin_left
+  type: string
+feed_news.background_content_id:
+  table: feed_news
+  column: background_content_id
+  type: string
+feed_news.background_color:
+  table: feed_news
+  column: background_color
+  type: string
+feed_news.date_created:
+  table: feed_news
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+feed_slides.feed_slide_id:
+  table: feed_slides
+  column: feed_slide_id
+  type: string
+feed_slides.feed_id:
+  table: feed_slides
+  column: feed_id
+  type: string
+feed_slides.content_id:
+  table: feed_slides
+  column: content_id
+  type: string
+feed_slides.heading:
+  table: feed_slides
+  column: heading
+  type: string
+feed_slides.paragraph:
+  table: feed_slides
+  column: paragraph
+  type: string
+feed_slides.date_created:
+  table: feed_slides
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+feed_types.feed_type_id:
+  table: feed_types
+  column: feed_type_id
+  type: string
+feed_types.name:
+  table: feed_types
+  column: name
+  type: string
+feed_types.description:
+  table: feed_types
+  column: description
+  type: string
+feed_types.date_created:
+  table: feed_types
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+feed_types.status:
+  table: feed_types
+  column: status
+  type: string
+feed_weathers.feed_weather_id:
+  table: feed_weathers
+  column: feed_weather_id
+  type: string
+feed_weathers.feed_id:
+  table: feed_weathers
+  column: feed_id
+  type: string
+feed_weathers.background_content_id:
+  table: feed_weathers
+  column: background_content_id
+  type: string
+feed_weathers.banner_content_id:
+  table: feed_weathers
+  column: banner_content_id
+  type: string
+feed_weathers.box_background_color:
+  table: feed_weathers
+  column: box_background_color
+  type: string
+feed_weathers.days_font_color:
+  table: feed_weathers
+  column: days_font_color
+  type: string
+feed_weathers.font_family:
+  table: feed_weathers
+  column: font_family
+  type: string
+feed_weathers.zip_code:
+  table: feed_weathers
+  column: zip_code
+  type: string
+feed_weathers.orientation:
+  table: feed_weathers
+  column: orientation
+  type: string
+feed_weathers.footer_content_id:
+  table: feed_weathers
+  column: footer_content_id
+  type: string
+feed_weathers.date_created:
+  table: feed_weathers
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+feeds.feed_id:
+  table: feeds
+  column: feed_id
+  type: string
+feeds.dealer_id:
+  table: feeds
+  column: dealer_id
+  type: string
+feeds.feed_type_id:
+  table: feeds
+  column: feed_type_id
+  type: string
+feeds.feed_title:
+  table: feeds
+  column: feed_title
+  type: string
+feeds.description:
+  table: feeds
+  column: description
+  type: string
+feeds.date_created:
+  table: feeds
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+feeds.date_updated:
+  table: feeds
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+feeds.created_by:
+  table: feeds
+  column: created_by
+  type: string
+feeds.updated_by:
+  table: feeds
+  column: updated_by
+  type: string
+feeds.status:
+  table: feeds
+  column: status
+  type: string
+field_group_fields.field_id:
+  table: field_group_fields
+  column: field_id
+  type: string
+field_group_fields.field_group_id:
+  table: field_group_fields
+  column: field_group_id
+  type: string
+field_group_fields.field_name:
+  table: field_group_fields
+  column: field_name
+  type: string
+field_group_fields.field_type:
+  table: field_group_fields
+  column: field_type
+  type: string
+field_group_fields.created_date:
+  table: field_group_fields
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+field_group_fields.updated_date:
+  table: field_group_fields
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+field_group_values.field_value_id:
+  table: field_group_values
+  column: field_value_id
+  type: string
+field_group_values.host_id:
+  table: field_group_values
+  column: host_id
+  type: string
+field_group_values.host_field_group_id:
+  table: field_group_values
+  column: host_field_group_id
+  type: string
+field_group_values.field_id:
+  table: field_group_values
+  column: field_id
+  type: string
+field_group_values.value:
+  table: field_group_values
+  column: value
+  type: string
+field_group_values.created_date:
+  table: field_group_values
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+field_group_values.updated_date:
+  table: field_group_values
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+field_groups.field_group_id:
+  table: field_groups
+  column: field_group_id
+  type: string
+field_groups.field_group_name:
+  table: field_groups
+  column: field_group_name
+  type: string
+field_groups.created_date:
+  table: field_groups
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+field_groups.updated_date:
+  table: field_groups
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_contents.filler_content_id:
+  table: filler_contents
+  column: filler_content_id
+  type: string
+filler_contents.filler_group_id:
+  table: filler_contents
+  column: filler_group_id
+  type: string
+filler_contents.handler_id:
+  table: filler_contents
+  column: handler_id
+  type: string
+filler_contents.file_type:
+  table: filler_contents
+  column: file_type
+  type: string
+filler_contents.file_size:
+  table: filler_contents
+  column: file_size
+  type: string
+filler_contents.uuid:
+  table: filler_contents
+  column: uuid
+  type: string
+filler_contents.filename:
+  table: filler_contents
+  column: filename
+  type: string
+filler_contents.date_created:
+  table: filler_contents
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_contents.date_updated:
+  table: filler_contents
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_contents.created_by:
+  table: filler_contents
+  column: created_by
+  type: string
+filler_contents.updated_by:
+  table: filler_contents
+  column: updated_by
+  type: string
+filler_contents.status:
+  table: filler_contents
+  column: status
+  type: string
+filler_contents.url:
+  table: filler_contents
+  column: url
+  type: string
+filler_contents.title:
+  table: filler_contents
+  column: title
+  type: string
+filler_contents_schedule.filler_contents_schedule_id:
+  table: filler_contents_schedule
+  column: filler_contents_schedule_id
+  type: string
+filler_contents_schedule.filler_content_id:
+  table: filler_contents_schedule
+  column: filler_content_id
+  type: string
+filler_contents_schedule.filler_group_id:
+  table: filler_contents_schedule
+  column: filler_group_id
+  type: string
+filler_contents_schedule.from:
+  table: filler_contents_schedule
+  column: from
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_contents_schedule.to:
+  table: filler_contents_schedule
+  column: to
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_contents_schedule.days:
+  table: filler_contents_schedule
+  column: days
+  type: string
+filler_contents_schedule.play_time_start:
+  table: filler_contents_schedule
+  column: play_time_start
+  type: string
+filler_contents_schedule.play_time_end:
+  table: filler_contents_schedule
+  column: play_time_end
+  type: string
+filler_contents_schedule.date_created:
+  table: filler_contents_schedule
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_contents_schedule.status:
+  table: filler_contents_schedule
+  column: status
+  type: string
+filler_group_blacklisted.filler_group_blacklisted_id:
+  table: filler_group_blacklisted
+  column: filler_group_blacklisted_id
+  type: string
+filler_group_blacklisted.filler_group_id:
+  table: filler_group_blacklisted
+  column: filler_group_id
+  type: string
+filler_group_blacklisted.owner_id:
+  table: filler_group_blacklisted
+  column: owner_id
+  type: string
+filler_group_blacklisted.date_created:
+  table: filler_group_blacklisted
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_group_blacklisted.date_updated:
+  table: filler_group_blacklisted
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_group_blacklisted.created_by:
+  table: filler_group_blacklisted
+  column: created_by
+  type: string
+filler_group_blacklisted.updated_by:
+  table: filler_group_blacklisted
+  column: updated_by
+  type: string
+filler_group_blacklisted.status:
+  table: filler_group_blacklisted
+  column: status
+  type: string
+filler_group_schedules.id:
+  table: filler_group_schedules
+  column: id
+  type: string
+filler_group_schedules.filler_content_id:
+  table: filler_group_schedules
+  column: filler_content_id
+  type: string
+filler_group_schedules.filler_group_id:
+  table: filler_group_schedules
+  column: filler_group_id
+  type: string
+filler_group_schedules.from:
+  table: filler_group_schedules
+  column: from
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_group_schedules.to:
+  table: filler_group_schedules
+  column: to
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_group_schedules.date_created:
+  table: filler_group_schedules
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_group_schedules.date_updated:
+  table: filler_group_schedules
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_group_schedules.created_by:
+  table: filler_group_schedules
+  column: created_by
+  type: string
+filler_group_schedules.updated_by:
+  table: filler_group_schedules
+  column: updated_by
+  type: string
+filler_group_schedules.status:
+  table: filler_group_schedules
+  column: status
+  type: string
+filler_groups.filler_group_id:
+  table: filler_groups
+  column: filler_group_id
+  type: string
+filler_groups.name:
+  table: filler_groups
+  column: name
+  type: string
+filler_groups.cover_photo:
+  table: filler_groups
+  column: cover_photo
+  type: string
+filler_groups.description:
+  table: filler_groups
+  column: description
+  type: string
+filler_groups.dealer_id:
+  table: filler_groups
+  column: dealer_id
+  type: string
+filler_groups.assigned_to:
+  table: filler_groups
+  column: assigned_to
+  type: string
+filler_groups.date_created:
+  table: filler_groups
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_groups.date_updated:
+  table: filler_groups
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_groups.created_by:
+  table: filler_groups
+  column: created_by
+  type: string
+filler_groups.updated_by:
+  table: filler_groups
+  column: updated_by
+  type: string
+filler_groups.status:
+  table: filler_groups
+  column: status
+  type: string
+filler_groups.handler_id:
+  table: filler_groups
+  column: handler_id
+  type: string
+filler_logs.id:
+  table: filler_logs
+  column: id
+  type: string
+filler_logs.license_key:
+  table: filler_logs
+  column: license_key
+  type: string
+filler_logs.filler_playlist_id:
+  table: filler_logs
+  column: filler_playlist_id
+  type: string
+filler_logs.group_id:
+  table: filler_logs
+  column: group_id
+  type: string
+filler_logs.date_created:
+  table: filler_logs
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_logs.date_updated:
+  table: filler_logs
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_playlist_contents.filler_playlist_contents_id:
+  table: filler_playlist_contents
+  column: filler_playlist_contents_id
+  type: string
+filler_playlist_contents.filler_playlist_id:
+  table: filler_playlist_contents
+  column: filler_playlist_id
+  type: string
+filler_playlist_contents.content_id:
+  table: filler_playlist_contents
+  column: content_id
+  type: string
+filler_playlist_contents.group_id:
+  table: filler_playlist_contents
+  column: group_id
+  type: string
+filler_playlist_contents.date_created:
+  table: filler_playlist_contents
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_playlist_contents.date_updated:
+  table: filler_playlist_contents
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_playlist_contents.created_by:
+  table: filler_playlist_contents
+  column: created_by
+  type: string
+filler_playlist_contents.updated_by:
+  table: filler_playlist_contents
+  column: updated_by
+  type: string
+filler_playlist_contents.status:
+  table: filler_playlist_contents
+  column: status
+  type: string
+filler_playlist_dealers.filler_playlist_dealer_id:
+  table: filler_playlist_dealers
+  column: filler_playlist_dealer_id
+  type: string
+filler_playlist_dealers.filler_playlist_id:
+  table: filler_playlist_dealers
+  column: filler_playlist_id
+  type: string
+filler_playlist_dealers.dealer_id:
+  table: filler_playlist_dealers
+  column: dealer_id
+  type: string
+filler_playlist_dealers.date_created:
+  table: filler_playlist_dealers
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_playlist_dealers.date_updated:
+  table: filler_playlist_dealers
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_playlist_dealers.created_by:
+  table: filler_playlist_dealers
+  column: created_by
+  type: string
+filler_playlist_dealers.updated_by:
+  table: filler_playlist_dealers
+  column: updated_by
+  type: string
+filler_playlist_groups.filler_playlist_group_id:
+  table: filler_playlist_groups
+  column: filler_playlist_group_id
+  type: string
+filler_playlist_groups.filler_playlist_id:
+  table: filler_playlist_groups
+  column: filler_playlist_id
+  type: string
+filler_playlist_groups.filler_group_id:
+  table: filler_playlist_groups
+  column: filler_group_id
+  type: string
+filler_playlist_groups.date_created:
+  table: filler_playlist_groups
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_playlist_groups.date_updated:
+  table: filler_playlist_groups
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_playlist_groups.created_by:
+  table: filler_playlist_groups
+  column: created_by
+  type: string
+filler_playlist_groups.updated_by:
+  table: filler_playlist_groups
+  column: updated_by
+  type: string
+filler_playlist_groups.status:
+  table: filler_playlist_groups
+  column: status
+  type: string
+filler_playlists.filler_playlist_id:
+  table: filler_playlists
+  column: filler_playlist_id
+  type: string
+filler_playlists.name:
+  table: filler_playlists
+  column: name
+  type: string
+filler_playlists.description:
+  table: filler_playlists
+  column: description
+  type: string
+filler_playlists.dealer_id:
+  table: filler_playlists
+  column: dealer_id
+  type: string
+filler_playlists.interval:
+  table: filler_playlists
+  column: interval
+  type: string
+filler_playlists.duration:
+  table: filler_playlists
+  column: duration
+  type: string
+filler_playlists.date_created:
+  table: filler_playlists
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_playlists.date_updated:
+  table: filler_playlists
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_playlists.created_by:
+  table: filler_playlists
+  column: created_by
+  type: string
+filler_playlists.updated_by:
+  table: filler_playlists
+  column: updated_by
+  type: string
+filler_playlists.status:
+  table: filler_playlists
+  column: status
+  type: string
+filler_playlists_20240305.filler_playlist_id:
+  table: filler_playlists_20240305
+  column: filler_playlist_id
+  type: string
+filler_playlists_20240305.name:
+  table: filler_playlists_20240305
+  column: name
+  type: string
+filler_playlists_20240305.description:
+  table: filler_playlists_20240305
+  column: description
+  type: string
+filler_playlists_20240305.dealer_id:
+  table: filler_playlists_20240305
+  column: dealer_id
+  type: string
+filler_playlists_20240305.interval:
+  table: filler_playlists_20240305
+  column: interval
+  type: string
+filler_playlists_20240305.duration:
+  table: filler_playlists_20240305
+  column: duration
+  type: string
+filler_playlists_20240305.date_created:
+  table: filler_playlists_20240305
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_playlists_20240305.date_updated:
+  table: filler_playlists_20240305
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+filler_playlists_20240305.created_by:
+  table: filler_playlists_20240305
+  column: created_by
+  type: string
+filler_playlists_20240305.updated_by:
+  table: filler_playlists_20240305
+  column: updated_by
+  type: string
+filler_playlists_20240305.status:
+  table: filler_playlists_20240305
+  column: status
+  type: string
+global_settings.vistar_network_id:
+  table: global_settings
+  column: vistar_network_id
+  type: string
+global_settings.vistar_api_key:
+  table: global_settings
+  column: vistar_api_key
+  type: string
+global_settings.pxchange_access_token:
+  table: global_settings
+  column: pxchange_access_token
+  type: string
+global_settings.pxchange_id_token:
+  table: global_settings
+  column: pxchange_id_token
+  type: string
+global_settings.date_updated:
+  table: global_settings
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+host_activity_logs.activity_log_id:
+  table: host_activity_logs
+  column: activity_log_id
+  type: string
+host_activity_logs.activity_code:
+  table: host_activity_logs
+  column: activity_code
+  type: string
+host_activity_logs.date_created:
+  table: host_activity_logs
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+host_activity_logs.date_updated:
+  table: host_activity_logs
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+host_activity_logs.initiated_by:
+  table: host_activity_logs
+  column: initiated_by
+  type: string
+host_activity_logs.owner_id:
+  table: host_activity_logs
+  column: owner_id
+  type: string
+host_field_groups.host_field_group_id:
+  table: host_field_groups
+  column: host_field_group_id
+  type: string
+host_field_groups.host_id:
+  table: host_field_groups
+  column: host_id
+  type: string
+host_field_groups.field_group_id:
+  table: host_field_groups
+  column: field_group_id
+  type: string
+host_field_groups.created_date:
+  table: host_field_groups
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+host_field_groups.updated_date:
+  table: host_field_groups
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+host_files.id:
+  table: host_files
+  column: id
+  type: string
+host_files.host_id:
+  table: host_files
+  column: host_id
+  type: string
+host_files.s3_filename:
+  table: host_files
+  column: s3_filename
+  type: string
+host_files.filename:
+  table: host_files
+  column: filename
+  type: string
+host_files.alias:
+  table: host_files
+  column: alias
+  type: string
+host_files.type:
+  table: host_files
+  column: type
+  type: string
+host_files.date_created:
+  table: host_files
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+host_files.created_by:
+  table: host_files
+  column: created_by
+  type: string
+host_programmatic.programmatic_id:
+  table: host_programmatic
+  column: programmatic_id
+  type: string
+host_programmatic.veneue_name:
+  table: host_programmatic
+  column: veneue_name
+  type: string
+host_programmatic.lat:
+  table: host_programmatic
+  column: lat
+  type: string
+host_programmatic.lng:
+  table: host_programmatic
+  column: lng
+  type: string
+host_programmatic.zip:
+  table: host_programmatic
+  column: zip
+  type: string
+host_programmatic.host_id:
+  table: host_programmatic
+  column: host_id
+  type: string
+host_support_tickets.ticket_id:
+  table: host_support_tickets
+  column: ticket_id
+  type: string
+host_support_tickets.host_id:
+  table: host_support_tickets
+  column: host_id
+  type: string
+host_support_tickets.notes:
+  table: host_support_tickets
+  column: notes
+  type: string
+host_support_tickets.url:
+  table: host_support_tickets
+  column: url
+  type: string
+host_support_tickets.date_created:
+  table: host_support_tickets
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+host_support_tickets.date_updated:
+  table: host_support_tickets
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+host_support_tickets.created_by:
+  table: host_support_tickets
+  column: created_by
+  type: string
+hosts.host_id:
+  table: hosts
+  column: host_id
+  type: string
+hosts.programmatic_id:
+  table: hosts
+  column: programmatic_id
+  type: string
+hosts.programmatic_date_updated:
+  table: hosts
+  column: programmatic_date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+hosts.dealer_id:
+  table: hosts
+  column: dealer_id
+  type: string
+hosts.user_id:
+  table: hosts
+  column: user_id
+  type: string
+hosts.name:
+  table: hosts
+  column: name
+  type: string
+hosts.address:
+  table: hosts
+  column: address
+  type: string
+hosts.street:
+  table: hosts
+  column: street
+  type: string
+hosts.city:
+  table: hosts
+  column: city
+  type: string
+hosts.postal_code:
+  table: hosts
+  column: postal_code
+  type: string
+hosts.region:
+  table: hosts
+  column: region
+  type: string
+hosts.state:
+  table: hosts
+  column: state
+  type: string
+hosts.country:
+  table: hosts
+  column: country
+  type: string
+hosts.group_id:
+  table: hosts
+  column: group_id
+  type: string
+hosts.latitude:
+  table: hosts
+  column: latitude
+  type: string
+hosts.longitude:
+  table: hosts
+  column: longitude
+  type: string
+hosts.time_zone:
+  table: hosts
+  column: time_zone
+  type: string
+hosts.store_hours:
+  table: hosts
+  column: store_hours
+  type: string
+hosts.venue_type:
+  table: hosts
+  column: venue_type
+  type: string
+hosts.monthly_traffic:
+  table: hosts
+  column: monthly_traffic
+  type: string
+hosts.avg_dwell_time:
+  table: hosts
+  column: avg_dwell_time
+  type: string
+hosts.avg_ticket:
+  table: hosts
+  column: avg_ticket
+  type: string
+hosts.demographics:
+  table: hosts
+  column: demographics
+  type: string
+hosts.internet:
+  table: hosts
+  column: internet
+  type: string
+hosts.notes:
+  table: hosts
+  column: notes
+  type: string
+hosts.install_date:
+  table: hosts
+  column: install_date
+  type: string
+hosts.date_created:
+  table: hosts
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+hosts.date_updated:
+  table: hosts
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+hosts.created_by:
+  table: hosts
+  column: created_by
+  type: string
+hosts.updated_by:
+  table: hosts
+  column: updated_by
+  type: string
+hosts.status:
+  table: hosts
+  column: status
+  type: string
+hosts.category:
+  table: hosts
+  column: category
+  type: string
+hosts.vistar_venue_id:
+  table: hosts
+  column: vistar_venue_id
+  type: string
+hosts.others:
+  table: hosts
+  column: others
+  type: string
+hosts.logo:
+  table: hosts
+  column: logo
+  type: string
+hosts.contact_person:
+  table: hosts
+  column: contact_person
+  type: string
+hosts.contact_number:
+  table: hosts
+  column: contact_number
+  type: string
+hosts_import.host_id:
+  table: hosts_import
+  column: host_id
+  type: string
+hosts_import.name:
+  table: hosts_import
+  column: name
+  type: string
+hosts_import.longitude:
+  table: hosts_import
+  column: longitude
+  type: string
+hosts_import.latitude:
+  table: hosts_import
+  column: latitude
+  type: string
+installation_checklist_items.installation_checklist_item_id:
+  table: installation_checklist_items
+  column: installation_checklist_item_id
+  type: string
+installation_checklist_items.installation_checklist_id:
+  table: installation_checklist_items
+  column: installation_checklist_id
+  type: string
+installation_checklist_items.title:
+  table: installation_checklist_items
+  column: title
+  type: string
+installation_checklist_items.description:
+  table: installation_checklist_items
+  column: description
+  type: string
+installation_checklist_items.created_date:
+  table: installation_checklist_items
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+installation_checklist_items.updated_date:
+  table: installation_checklist_items
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+installation_checklists.installation_checklist_id:
+  table: installation_checklists
+  column: installation_checklist_id
+  type: string
+installation_checklists.title:
+  table: installation_checklists
+  column: title
+  type: string
+installation_checklists.description:
+  table: installation_checklists
+  column: description
+  type: string
+installation_checklists.created_date:
+  table: installation_checklists
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+installation_checklists.updated_date:
+  table: installation_checklists
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+license_favorites.license_favorite_id:
+  table: license_favorites
+  column: license_favorite_id
+  type: string
+license_favorites.user_id:
+  table: license_favorites
+  column: user_id
+  type: string
+license_favorites.license_id:
+  table: license_favorites
+  column: license_id
+  type: string
+license_favorites.date_created:
+  table: license_favorites
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+license_favorites.date_updated:
+  table: license_favorites
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+license_installation_checklists.license_installation_checklist_id:
+  table: license_installation_checklists
+  column: license_installation_checklist_id
+  type: string
+license_installation_checklists.installation_checklist_item_id:
+  table: license_installation_checklists
+  column: installation_checklist_item_id
+  type: string
+license_installation_checklists.license_id:
+  table: license_installation_checklists
+  column: license_id
+  type: string
+license_installation_checklists.created_date:
+  table: license_installation_checklists
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+license_installation_checklists.updated_date:
+  table: license_installation_checklists
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+license_playlist_contents.license_playlist_content_id:
+  table: license_playlist_contents
+  column: license_playlist_content_id
+  type: string
+license_playlist_contents.license_id:
+  table: license_playlist_contents
+  column: license_id
+  type: string
+license_playlist_contents.playlist_content_id:
+  table: license_playlist_contents
+  column: playlist_content_id
+  type: string
+license_playlist_contents.created_by:
+  table: license_playlist_contents
+  column: created_by
+  type: string
+license_playlist_contents.date_created:
+  table: license_playlist_contents
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+license_screens.license_screen_id:
+  table: license_screens
+  column: license_screen_id
+  type: string
+license_screens.license_id:
+  table: license_screens
+  column: license_id
+  type: string
+license_screens.screen_id:
+  table: license_screens
+  column: screen_id
+  type: string
+licenses.license_id:
+  table: licenses
+  column: license_id
+  type: string
+licenses.license_key:
+  table: licenses
+  column: license_key
+  type: string
+licenses.mac_address:
+  table: licenses
+  column: mac_address
+  type: string
+licenses.dealer_id:
+  table: licenses
+  column: dealer_id
+  type: string
+licenses.host_id:
+  table: licenses
+  column: host_id
+  type: string
+licenses.date_created:
+  table: licenses
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+licenses.internet_type:
+  table: licenses
+  column: internet_type
+  type: string
+licenses.internet_speed:
+  table: licenses
+  column: internet_speed
+  type: string
+licenses.memory:
+  table: licenses
+  column: memory
+  type: string
+licenses.total_storage:
+  table: licenses
+  column: total_storage
+  type: string
+licenses.free_storage:
+  table: licenses
+  column: free_storage
+  type: string
+licenses.date_updated:
+  table: licenses
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+licenses.contents_updated:
+  table: licenses
+  column: contents_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+licenses.player_socket_id:
+  table: licenses
+  column: player_socket_id
+  type: string
+licenses.pi_socket_id:
+  table: licenses
+  column: pi_socket_id
+  type: string
+licenses.alias:
+  table: licenses
+  column: alias
+  type: string
+licenses.time_in:
+  table: licenses
+  column: time_in
+  type: string
+licenses.time_out:
+  table: licenses
+  column: time_out
+  type: string
+licenses.anydesk_id:
+  table: licenses
+  column: anydesk_id
+  type: string
+licenses.app_version:
+  table: licenses
+  column: app_version
+  type: string
+licenses.player_ui_key:
+  table: licenses
+  column: player_ui_key
+  type: string
+licenses.player_asset_server_key:
+  table: licenses
+  column: player_asset_server_key
+  type: string
+licenses.install_date:
+  table: licenses
+  column: install_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+licenses.install_date2:
+  table: licenses
+  column: install_date2
+  type: string
+licenses.internet_info:
+  table: licenses
+  column: internet_info
+  type: string
+licenses.screenshot:
+  table: licenses
+  column: screenshot
+  type: string
+licenses.server_version:
+  table: licenses
+  column: server_version
+  type: string
+licenses.ui_version:
+  table: licenses
+  column: ui_version
+  type: string
+licenses.reboot_time:
+  table: licenses
+  column: reboot_time
+  type: string
+licenses.tv_brand:
+  table: licenses
+  column: tv_brand
+  type: string
+licenses.public_ip:
+  table: licenses
+  column: public_ip
+  type: string
+licenses.prev_public_ip:
+  table: licenses
+  column: prev_public_ip
+  type: string
+licenses.install_request_date:
+  table: licenses
+  column: install_request_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+licenses.background_image_url:
+  table: licenses
+  column: background_image_url
+  type: string
+licenses.pi_local_date_time:
+  table: licenses
+  column: pi_local_date_time
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+licenses.display_status_date_updated:
+  table: licenses
+  column: display_status_date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+licenses.player_status_date_updated:
+  table: licenses
+  column: player_status_date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+licenses_acquired.license_acquired_id:
+  table: licenses_acquired
+  column: license_acquired_id
+  type: string
+licenses_acquired.license_id:
+  table: licenses_acquired
+  column: license_id
+  type: string
+licenses_acquired.license_key:
+  table: licenses_acquired
+  column: license_key
+  type: string
+licenses_acquired.dealer_id:
+  table: licenses_acquired
+  column: dealer_id
+  type: string
+licenses_acquired.date_created:
+  table: licenses_acquired
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+licenses_acquired.date_updated:
+  table: licenses_acquired
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+news_cron.id:
+  table: news_cron
+  column: id
+  type: string
+news_cron.url:
+  table: news_cron
+  column: url
+  type: string
+news_cron.data:
+  table: news_cron
+  column: data
+  type: string
+news_cron.date_updated:
+  table: news_cron
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+news_cron.error:
+  table: news_cron
+  column: error
+  type: string
+notification_logs.license_id:
+  table: notification_logs
+  column: license_id
+  type: string
+notification_logs.date_added:
+  table: notification_logs
+  column: date_added
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+notification_logs.timezone:
+  table: notification_logs
+  column: timezone
+  type: string
+notification_logs.log_date:
+  table: notification_logs
+  column: log_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+notifications.id:
+  table: notifications
+  column: id
+  type: string
+notifications.receiver_id:
+  table: notifications
+  column: receiver_id
+  type: string
+notifications.message:
+  table: notifications
+  column: message
+  type: string
+notifications.date_created:
+  table: notifications
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+notifications.created_by:
+  table: notifications
+  column: created_by
+  type: string
+notifications.status:
+  table: notifications
+  column: status
+  type: string
+orders_viewed.order_id:
+  table: orders_viewed
+  column: order_id
+  type: string
+orders_viewed.date_created:
+  table: orders_viewed
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+orders_viewed.created_by:
+  table: orders_viewed
+  column: created_by
+  type: string
+permissions.name:
+  table: permissions
+  column: name
+  type: string
+permissions.status:
+  table: permissions
+  column: status
+  type: string
+placer_dumps.placer_dump_id:
+  table: placer_dumps
+  column: placer_dump_id
+  type: string
+placer_dumps.placer_id:
+  table: placer_dumps
+  column: placer_id
+  type: string
+placer_dumps.publication_date:
+  table: placer_dumps
+  column: publication_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+placer_dumps.start_date:
+  table: placer_dumps
+  column: start_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+placer_dumps.end_date:
+  table: placer_dumps
+  column: end_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+placer_dumps.source_file:
+  table: placer_dumps
+  column: source_file
+  type: string
+placer_dumps.date_created:
+  table: placer_dumps
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+placer_dumps.date_updated:
+  table: placer_dumps
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+placer_dumps.created_by:
+  table: placer_dumps
+  column: created_by
+  type: string
+placer_dumps.updated_by:
+  table: placer_dumps
+  column: updated_by
+  type: string
+placer_dumps.status:
+  table: placer_dumps
+  column: status
+  type: string
+placers.placer_id:
+  table: placers
+  column: placer_id
+  type: string
+placers.name:
+  table: placers
+  column: name
+  type: string
+placers.host_id:
+  table: placers
+  column: host_id
+  type: string
+placers.latitude:
+  table: placers
+  column: latitude
+  type: string
+placers.longitude:
+  table: placers
+  column: longitude
+  type: string
+placers.date_created:
+  table: placers
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+placers.date_updated:
+  table: placers
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+placers.created_by:
+  table: placers
+  column: created_by
+  type: string
+placers.updated_by:
+  table: placers
+  column: updated_by
+  type: string
+placers.status:
+  table: placers
+  column: status
+  type: string
+player_app_versions.version_id:
+  table: player_app_versions
+  column: version_id
+  type: string
+player_app_versions.app_id:
+  table: player_app_versions
+  column: app_id
+  type: string
+player_app_versions.version:
+  table: player_app_versions
+  column: version
+  type: string
+player_app_versions.release_notes:
+  table: player_app_versions
+  column: release_notes
+  type: string
+player_app_versions.zip_url:
+  table: player_app_versions
+  column: zip_url
+  type: string
+player_app_versions.date_created:
+  table: player_app_versions
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+player_app_versions.date_updated:
+  table: player_app_versions
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+player_apps.app_id:
+  table: player_apps
+  column: app_id
+  type: string
+player_apps.app_name:
+  table: player_apps
+  column: app_name
+  type: string
+player_apps.app_description:
+  table: player_apps
+  column: app_description
+  type: string
+player_apps.github_url:
+  table: player_apps
+  column: github_url
+  type: string
+player_apps.current_version:
+  table: player_apps
+  column: current_version
+  type: string
+player_apps.date_created:
+  table: player_apps
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+player_apps.date_updated:
+  table: player_apps
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+player_asset_server.player_asset_server_key:
+  table: player_asset_server
+  column: player_asset_server_key
+  type: string
+player_asset_server.name:
+  table: player_asset_server
+  column: name
+  type: string
+player_asset_server.description:
+  table: player_asset_server
+  column: description
+  type: string
+player_asset_server.date_created:
+  table: player_asset_server
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+player_asset_server.date_updated:
+  table: player_asset_server
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+player_ui.player_ui_key:
+  table: player_ui
+  column: player_ui_key
+  type: string
+player_ui.name:
+  table: player_ui
+  column: name
+  type: string
+player_ui.description:
+  table: player_ui
+  column: description
+  type: string
+player_ui.date_created:
+  table: player_ui
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+player_ui.date_updated:
+  table: player_ui
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+playlist_content_credits.playlist_content_credit_id:
+  table: playlist_content_credits
+  column: playlist_content_credit_id
+  type: string
+playlist_content_credits.playlist_content_id:
+  table: playlist_content_credits
+  column: playlist_content_id
+  type: string
+playlist_content_credits.license_id:
+  table: playlist_content_credits
+  column: license_id
+  type: string
+playlist_content_credits.date_created:
+  table: playlist_content_credits
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+playlist_content_credits.date_updated:
+  table: playlist_content_credits
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+playlist_content_credits.status:
+  table: playlist_content_credits
+  column: status
+  type: string
+playlist_contents.playlist_content_id:
+  table: playlist_contents
+  column: playlist_content_id
+  type: string
+playlist_contents.playlist_id:
+  table: playlist_contents
+  column: playlist_id
+  type: string
+playlist_contents.content_id:
+  table: playlist_contents
+  column: content_id
+  type: string
+playlist_contents.parent_id:
+  table: playlist_contents
+  column: parent_id
+  type: string
+playlist_contents_schedule.playlist_contents_schedule_id:
+  table: playlist_contents_schedule
+  column: playlist_contents_schedule_id
+  type: string
+playlist_contents_schedule.playlist_content_id:
+  table: playlist_contents_schedule
+  column: playlist_content_id
+  type: string
+playlist_contents_schedule.from:
+  table: playlist_contents_schedule
+  column: from
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+playlist_contents_schedule.to:
+  table: playlist_contents_schedule
+  column: to
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+playlist_contents_schedule.days:
+  table: playlist_contents_schedule
+  column: days
+  type: string
+playlist_contents_schedule.play_time_start:
+  table: playlist_contents_schedule
+  column: play_time_start
+  type: string
+playlist_contents_schedule.play_time_end:
+  table: playlist_contents_schedule
+  column: play_time_end
+  type: string
+playlist_contents_schedule.date_created:
+  table: playlist_contents_schedule
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+playlist_contents_schedule.status:
+  table: playlist_contents_schedule
+  column: status
+  type: string
+playlists.playlist_id:
+  table: playlists
+  column: playlist_id
+  type: string
+playlists.dealer_id:
+  table: playlists
+  column: dealer_id
+  type: string
+playlists.name:
+  table: playlists
+  column: name
+  type: string
+playlists.description:
+  table: playlists
+  column: description
+  type: string
+playlists.date_created:
+  table: playlists
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+playlists.date_updated:
+  table: playlists
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+purchase_items.order_no:
+  table: purchase_items
+  column: order_no
+  type: string
+purchase_items.dealer_id:
+  table: purchase_items
+  column: dealer_id
+  type: string
+purchase_items.status:
+  table: purchase_items
+  column: status
+  type: string
+purchase_items.date_created:
+  table: purchase_items
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+purchase_items.created_by:
+  table: purchase_items
+  column: created_by
+  type: string
+purchase_items.date_updated:
+  table: purchase_items
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+purchase_items.updated_by:
+  table: purchase_items
+  column: updated_by
+  type: string
+release_notes.release_note_id:
+  table: release_notes
+  column: release_note_id
+  type: string
+release_notes.title:
+  table: release_notes
+  column: title
+  type: string
+release_notes.description:
+  table: release_notes
+  column: description
+  type: string
+release_notes.version:
+  table: release_notes
+  column: version
+  type: string
+release_notes.created_by:
+  table: release_notes
+  column: created_by
+  type: string
+release_notes.date_created:
+  table: release_notes
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+resource_logs.resource_log_id:
+  table: resource_logs
+  column: resource_log_id
+  type: string
+resource_logs.license_id:
+  table: resource_logs
+  column: license_id
+  type: string
+resource_logs.uptime:
+  table: resource_logs
+  column: uptime
+  type: string
+resource_logs.log_date:
+  table: resource_logs
+  column: log_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+resource_logs.log_hour:
+  table: resource_logs
+  column: log_hour
+  type: string
+resource_logs.date_created:
+  table: resource_logs
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+roles.role_id:
+  table: roles
+  column: role_id
+  type: string
+roles.role_name:
+  table: roles
+  column: role_name
+  type: string
+roles.status:
+  table: roles
+  column: status
+  type: string
+screen_template_zone_playlists.screen_template_zone_playlist_id:
+  table: screen_template_zone_playlists
+  column: screen_template_zone_playlist_id
+  type: string
+screen_template_zone_playlists.screen_id:
+  table: screen_template_zone_playlists
+  column: screen_id
+  type: string
+screen_template_zone_playlists.template_id:
+  table: screen_template_zone_playlists
+  column: template_id
+  type: string
+screen_template_zone_playlists.template_zone_id:
+  table: screen_template_zone_playlists
+  column: template_zone_id
+  type: string
+screen_template_zone_playlists.playlist_id:
+  table: screen_template_zone_playlists
+  column: playlist_id
+  type: string
+screen_types.screen_type_id:
+  table: screen_types
+  column: screen_type_id
+  type: string
+screen_types.name:
+  table: screen_types
+  column: name
+  type: string
+screen_types.description:
+  table: screen_types
+  column: description
+  type: string
+screen_types.date_created:
+  table: screen_types
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+screen_types.date_updated:
+  table: screen_types
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+screens.screen_id:
+  table: screens
+  column: screen_id
+  type: string
+screens.screen_name:
+  table: screens
+  column: screen_name
+  type: string
+screens.description:
+  table: screens
+  column: description
+  type: string
+screens.dealer_id:
+  table: screens
+  column: dealer_id
+  type: string
+screens.host_id:
+  table: screens
+  column: host_id
+  type: string
+screens.template_id:
+  table: screens
+  column: template_id
+  type: string
+screens.created_by:
+  table: screens
+  column: created_by
+  type: string
+screens.date_created:
+  table: screens
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+screens.date_updated:
+  table: screens
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+screens.screen_type_id:
+  table: screens
+  column: screen_type_id
+  type: string
+states_us_ca.id:
+  table: states_us_ca
+  column: id
+  type: string
+states_us_ca.state:
+  table: states_us_ca
+  column: state
+  type: string
+states_us_ca.abbreviation:
+  table: states_us_ca
+  column: abbreviation
+  type: string
+states_us_ca.region:
+  table: states_us_ca
+  column: region
+  type: string
+states_us_ca.country:
+  table: states_us_ca
+  column: country
+  type: string
+states_us_ca.date_created:
+  table: states_us_ca
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+states_us_ca.date_updated:
+  table: states_us_ca
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+states_us_ca.created_by:
+  table: states_us_ca
+  column: created_by
+  type: string
+states_us_ca.updated_by:
+  table: states_us_ca
+  column: updated_by
+  type: string
+states_us_ca.status:
+  table: states_us_ca
+  column: status
+  type: string
+stripe_users.dealer_id:
+  table: stripe_users
+  column: dealer_id
+  type: string
+stripe_users.email:
+  table: stripe_users
+  column: email
+  type: string
+stripe_users.stripe_id:
+  table: stripe_users
+  column: stripe_id
+  type: string
+stripe_users.created_date:
+  table: stripe_users
+  column: created_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+stripe_users.updated_date:
+  table: stripe_users
+  column: updated_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+stripe_users.status:
+  table: stripe_users
+  column: status
+  type: string
+tag_details.tag_details_id:
+  table: tag_details
+  column: tag_details_id
+  type: string
+tag_details.tag_id:
+  table: tag_details
+  column: tag_id
+  type: string
+tag_details.owner_id:
+  table: tag_details
+  column: owner_id
+  type: string
+tag_details.date_created:
+  table: tag_details
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+tag_types.name:
+  table: tag_types
+  column: name
+  type: string
+tag_types.date_created:
+  table: tag_types
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+tag_types.status:
+  table: tag_types
+  column: status
+  type: string
+tags.tag_id:
+  table: tags
+  column: tag_id
+  type: string
+tags.name:
+  table: tags
+  column: name
+  type: string
+tags.description:
+  table: tags
+  column: description
+  type: string
+tags.tag_color:
+  table: tags
+  column: tag_color
+  type: string
+tags.date_created:
+  table: tags
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+tags.created_by:
+  table: tags
+  column: created_by
+  type: string
+tags.dealer_id:
+  table: tags
+  column: dealer_id
+  type: string
+template_zones.template_zone_id:
+  table: template_zones
+  column: template_zone_id
+  type: string
+template_zones.template_id:
+  table: template_zones
+  column: template_id
+  type: string
+template_zones.name:
+  table: template_zones
+  column: name
+  type: string
+template_zones.description:
+  table: template_zones
+  column: description
+  type: string
+template_zones.background:
+  table: template_zones
+  column: background
+  type: string
+templates.template_id:
+  table: templates
+  column: template_id
+  type: string
+templates.name:
+  table: templates
+  column: name
+  type: string
+time_zones.id:
+  table: time_zones
+  column: id
+  type: string
+time_zones.name:
+  table: time_zones
+  column: name
+  type: string
+time_zones.date_created:
+  table: time_zones
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+time_zones.status:
+  table: time_zones
+  column: status
+  type: string
+tv_brands.brand_id:
+  table: tv_brands
+  column: brand_id
+  type: string
+tv_brands.brand_name:
+  table: tv_brands
+  column: brand_name
+  type: string
+tv_brands.date_created:
+  table: tv_brands
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+user_activity_logs.activity_log_id:
+  table: user_activity_logs
+  column: activity_log_id
+  type: string
+user_activity_logs.owner_id:
+  table: user_activity_logs
+  column: owner_id
+  type: string
+user_activity_logs.activity_code:
+  table: user_activity_logs
+  column: activity_code
+  type: string
+user_activity_logs.date_created:
+  table: user_activity_logs
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+user_activity_logs.initiated_by:
+  table: user_activity_logs
+  column: initiated_by
+  type: string
+user_activity_logs.target_id:
+  table: user_activity_logs
+  column: target_id
+  type: string
+user_activity_logs.target_name:
+  table: user_activity_logs
+  column: target_name
+  type: string
+user_roles.uer_role_id:
+  table: user_roles
+  column: uer_role_id
+  type: string
+user_roles.user_id:
+  table: user_roles
+  column: user_id
+  type: string
+user_roles.role_id:
+  table: user_roles
+  column: role_id
+  type: string
+user_roles.parent_id:
+  table: user_roles
+  column: parent_id
+  type: string
+user_roles.permission:
+  table: user_roles
+  column: permission
+  type: string
+user_roles.status:
+  table: user_roles
+  column: status
+  type: string
+user_roles.date_created:
+  table: user_roles
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+user_roles.date_updated:
+  table: user_roles
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+user_roles.created_by:
+  table: user_roles
+  column: created_by
+  type: string
+user_roles.updated_by:
+  table: user_roles
+  column: updated_by
+  type: string
+users.user_id:
+  table: users
+  column: user_id
+  type: string
+users.first_name:
+  table: users
+  column: first_name
+  type: string
+users.middle_name:
+  table: users
+  column: middle_name
+  type: string
+users.last_name:
+  table: users
+  column: last_name
+  type: string
+users.email:
+  table: users
+  column: email
+  type: string
+users.password:
+  table: users
+  column: password
+  type: string
+users.profile_picture:
+  table: users
+  column: profile_picture
+  type: string
+users.contact_number:
+  table: users
+  column: contact_number
+  type: string
+users.date_created:
+  table: users
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+users.date_updated:
+  table: users
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+users.created_by:
+  table: users
+  column: created_by
+  type: string
+users.updated_by:
+  table: users
+  column: updated_by
+  type: string
+users.status:
+  table: users
+  column: status
+  type: string
+users.token:
+  table: users
+  column: token
+  type: string
+users.refresh_token:
+  table: users
+  column: refresh_token
+  type: string
+users.last_logged_in_date:
+  table: users
+  column: last_logged_in_date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+webhooks.uuid:
+  table: webhooks
+  column: uuid
+  type: string
+webhooks.text:
+  table: webhooks
+  column: text
+  type: string
+webhooks.url:
+  table: webhooks
+  column: url
+  type: string
+webhooks.file_type:
+  table: webhooks
+  column: file_type
+  type: string
+webhooks.date_created:
+  table: webhooks
+  column: date_created
+  type: string
+webhooks.date:
+  table: webhooks
+  column: date
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+webhooks.host_id:
+  table: webhooks
+  column: host_id
+  type: string
+webhooks.handler_id:
+  table: webhooks
+  column: handler_id
+  type: string
+webhooks_convert.uuid:
+  table: webhooks_convert
+  column: uuid
+  type: string
+webhooks_convert.handler:
+  table: webhooks_convert
+  column: handler
+  type: string
+webhooks_convert.filename:
+  table: webhooks_convert
+  column: filename
+  type: string
+webhooks_convert.date_created:
+  table: webhooks_convert
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+websockets.connection_id:
+  table: websockets
+  column: connection_id
+  type: string
+websockets.entity:
+  table: websockets
+  column: entity
+  type: string
+websockets.date_added:
+  table: websockets
+  column: date_added
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+websockets.date_updated:
+  table: websockets
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+xml_settings.id:
+  table: xml_settings
+  column: id
+  type: string
+xml_settings.name:
+  table: xml_settings
+  column: name
+  type: string
+xml_settings.date_created:
+  table: xml_settings
+  column: date_created
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+xml_settings.date_updated:
+  table: xml_settings
+  column: date_updated
+  type: datetime
+  grains:
+  - day
+  - month
+  - year
+xml_settings.created_by:
+  table: xml_settings
+  column: created_by
+  type: string
+xml_settings.updated_by:
+  table: xml_settings
+  column: updated_by
+  type: string
+xml_settings.status:
+  table: xml_settings
+  column: status
+  type: string

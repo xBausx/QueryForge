@@ -1,38 +1,1556 @@
-# Counts
-hosts.count:
-  expression: "COUNT(hosts.host_id)"
-  description: "Number of hosts"
-
-dealers.count:
-  expression: "COUNT(dealers.dealer_id)"
-  description: "Number of dealers"
-
-licenses.count:
-  expression: "COUNT(licenses.license_id)"
-  description: "Number of licenses"
-
-# License health
-licenses.registered.count:
-  expression: "SUM(CASE WHEN licenses.is_registered = 1 THEN 1 ELSE 0 END)"
-  description: "Registered licenses"
-
-licenses.activated.count:
-  expression: "SUM(CASE WHEN licenses.is_activated = 1 THEN 1 ELSE 0 END)"
-  description: "Activated licenses"
-
-licenses.activation_rate:
-  expression: "CASE WHEN COUNT(licenses.license_id)=0 THEN 0 ELSE SUM(CASE WHEN licenses.is_activated=1 THEN 1 ELSE 0 END) / COUNT(licenses.license_id) END"
-  description: "Activation rate (activated / licenses.count)"
-
-# Useful extras
-hosts.with_programmatic_id.count:
-  expression: "COUNT(hosts.programmatic_id)"
-  description: "Hosts with non-null programmatic_id"
-
-hosts.unique_cities:
-  expression: "COUNT(DISTINCT hosts.city)"
-  description: "Distinct cities with hosts"
-
-dealers.unique_regions:
-  expression: "COUNT(DISTINCT dealers.region)"
-  description: "Distinct dealer regions"
+activities.count_rows:
+  table: activities
+  agg: count
+  expr: '*'
+activity_logs.count_rows:
+  table: activity_logs
+  agg: count
+  expr: '*'
+advertiser_activity_logs.count_rows:
+  table: advertiser_activity_logs
+  agg: count
+  expr: '*'
+advertiser_deleted_contents_for_logs.count_rows:
+  table: advertiser_deleted_contents_for_logs
+  agg: count
+  expr: '*'
+advertisers.count_rows:
+  table: advertisers
+  agg: count
+  expr: '*'
+blacklisted_contents.count_rows:
+  table: blacklisted_contents
+  agg: count
+  expr: '*'
+categories.count_rows:
+  table: categories
+  agg: count
+  expr: '*'
+cities.count_rows:
+  table: cities
+  agg: count
+  expr: '*'
+cities.sum_id:
+  table: cities
+  agg: sum
+  column: id
+cities.avg_id:
+  table: cities
+  agg: avg
+  column: id
+cities_state_data.count_rows:
+  table: cities_state_data
+  agg: count
+  expr: '*'
+cities_state_data.sum_id:
+  table: cities_state_data
+  agg: sum
+  column: id
+cities_state_data.avg_id:
+  table: cities_state_data
+  agg: avg
+  column: id
+cities_state_data.sum_is_manually_added:
+  table: cities_state_data
+  agg: sum
+  column: is_manually_added
+cities_state_data.avg_is_manually_added:
+  table: cities_state_data
+  agg: avg
+  column: is_manually_added
+content_history_logs.count_rows:
+  table: content_history_logs
+  agg: count
+  expr: '*'
+content_history_logs.sum_log_id:
+  table: content_history_logs
+  agg: sum
+  column: log_id
+content_history_logs.avg_log_id:
+  table: content_history_logs
+  agg: avg
+  column: log_id
+content_play_logs.count_rows:
+  table: content_play_logs
+  agg: count
+  expr: '*'
+content_plays_daily.count_rows:
+  table: content_plays_daily
+  agg: count
+  expr: '*'
+content_plays_daily.sum_total:
+  table: content_plays_daily
+  agg: sum
+  column: total
+content_plays_daily.avg_total:
+  table: content_plays_daily
+  agg: avg
+  column: total
+content_plays_daily.sum_duration:
+  table: content_plays_daily
+  agg: sum
+  column: duration
+content_plays_daily.avg_duration:
+  table: content_plays_daily
+  agg: avg
+  column: duration
+content_plays_daily_2024_july_august.count_rows:
+  table: content_plays_daily_2024_july_august
+  agg: count
+  expr: '*'
+content_plays_daily_2024_july_august.sum_total:
+  table: content_plays_daily_2024_july_august
+  agg: sum
+  column: total
+content_plays_daily_2024_july_august.avg_total:
+  table: content_plays_daily_2024_july_august
+  agg: avg
+  column: total
+content_plays_daily_2024_july_august.sum_duration:
+  table: content_plays_daily_2024_july_august
+  agg: sum
+  column: duration
+content_plays_daily_2024_july_august.avg_duration:
+  table: content_plays_daily_2024_july_august
+  agg: avg
+  column: duration
+content_plays_daily_logs.count_rows:
+  table: content_plays_daily_logs
+  agg: count
+  expr: '*'
+content_plays_daily_logs.sum_total:
+  table: content_plays_daily_logs
+  agg: sum
+  column: total
+content_plays_daily_logs.avg_total:
+  table: content_plays_daily_logs
+  agg: avg
+  column: total
+content_plays_daily_logs.sum_duration:
+  table: content_plays_daily_logs
+  agg: sum
+  column: duration
+content_plays_daily_logs.avg_duration:
+  table: content_plays_daily_logs
+  agg: avg
+  column: duration
+content_plays_daily_migration.count_rows:
+  table: content_plays_daily_migration
+  agg: count
+  expr: '*'
+content_plays_daily_migration.sum_total:
+  table: content_plays_daily_migration
+  agg: sum
+  column: total
+content_plays_daily_migration.avg_total:
+  table: content_plays_daily_migration
+  agg: avg
+  column: total
+content_plays_daily_migration.sum_duration:
+  table: content_plays_daily_migration
+  agg: sum
+  column: duration
+content_plays_daily_migration.avg_duration:
+  table: content_plays_daily_migration
+  agg: avg
+  column: duration
+content_plays_daily_migration_params.count_rows:
+  table: content_plays_daily_migration_params
+  agg: count
+  expr: '*'
+content_plays_daily_replicate.count_rows:
+  table: content_plays_daily_replicate
+  agg: count
+  expr: '*'
+content_plays_daily_replicate.sum_total:
+  table: content_plays_daily_replicate
+  agg: sum
+  column: total
+content_plays_daily_replicate.avg_total:
+  table: content_plays_daily_replicate
+  agg: avg
+  column: total
+content_plays_daily_replicate.sum_duration:
+  table: content_plays_daily_replicate
+  agg: sum
+  column: duration
+content_plays_daily_replicate.avg_duration:
+  table: content_plays_daily_replicate
+  agg: avg
+  column: duration
+content_plays_hourly.count_rows:
+  table: content_plays_hourly
+  agg: count
+  expr: '*'
+content_plays_hourly.sum_total:
+  table: content_plays_hourly
+  agg: sum
+  column: total
+content_plays_hourly.avg_total:
+  table: content_plays_hourly
+  agg: avg
+  column: total
+content_plays_hourly.sum_duration:
+  table: content_plays_hourly
+  agg: sum
+  column: duration
+content_plays_hourly.avg_duration:
+  table: content_plays_hourly
+  agg: avg
+  column: duration
+contents.count_rows:
+  table: contents
+  agg: count
+  expr: '*'
+contents.sum_is_converted:
+  table: contents
+  agg: sum
+  column: is_converted
+contents.avg_is_converted:
+  table: contents
+  agg: avg
+  column: is_converted
+contents.sum_duration:
+  table: contents
+  agg: sum
+  column: duration
+contents.avg_duration:
+  table: contents
+  agg: avg
+  column: duration
+contents.sum_is_protected:
+  table: contents
+  agg: sum
+  column: is_protected
+contents.avg_is_protected:
+  table: contents
+  agg: avg
+  column: is_protected
+contents.sum_owner_role_id:
+  table: contents
+  agg: sum
+  column: owner_role_id
+contents.avg_owner_role_id:
+  table: contents
+  agg: avg
+  column: owner_role_id
+contents.sum_is_deleted:
+  table: contents
+  agg: sum
+  column: is_deleted
+contents.avg_is_deleted:
+  table: contents
+  agg: avg
+  column: is_deleted
+countries.count_rows:
+  table: countries
+  agg: count
+  expr: '*'
+countries.sum_id:
+  table: countries
+  agg: sum
+  column: id
+countries.avg_id:
+  table: countries
+  agg: avg
+  column: id
+countries.sum_latitude:
+  table: countries
+  agg: sum
+  column: latitude
+countries.avg_latitude:
+  table: countries
+  agg: avg
+  column: latitude
+countries.sum_longitude:
+  table: countries
+  agg: sum
+  column: longitude
+countries.avg_longitude:
+  table: countries
+  agg: avg
+  column: longitude
+countries.sum_flag:
+  table: countries
+  agg: sum
+  column: flag
+countries.avg_flag:
+  table: countries
+  agg: avg
+  column: flag
+dealer_activity_logs.count_rows:
+  table: dealer_activity_logs
+  agg: count
+  expr: '*'
+dealer_address_books.count_rows:
+  table: dealer_address_books
+  agg: count
+  expr: '*'
+dealer_address_books.sum_type_id:
+  table: dealer_address_books
+  agg: sum
+  column: type_id
+dealer_address_books.avg_type_id:
+  table: dealer_address_books
+  agg: avg
+  column: type_id
+dealer_address_books.sum_is_default:
+  table: dealer_address_books
+  agg: sum
+  column: is_default
+dealer_address_books.avg_is_default:
+  table: dealer_address_books
+  agg: avg
+  column: is_default
+dealer_admins.count_rows:
+  table: dealer_admins
+  agg: count
+  expr: '*'
+dealer_contract_details.count_rows:
+  table: dealer_contract_details
+  agg: count
+  expr: '*'
+dealer_contract_details.sum_contr_lic:
+  table: dealer_contract_details
+  agg: sum
+  column: contr_lic
+dealer_contract_details.avg_contr_lic:
+  table: dealer_contract_details
+  agg: avg
+  column: contr_lic
+dealer_contract_details.sum_lic_to_start:
+  table: dealer_contract_details
+  agg: sum
+  column: lic_to_start
+dealer_contract_details.avg_lic_to_start:
+  table: dealer_contract_details
+  agg: avg
+  column: lic_to_start
+dealer_contract_details.sum_base:
+  table: dealer_contract_details
+  agg: sum
+  column: base
+dealer_contract_details.avg_base:
+  table: dealer_contract_details
+  agg: avg
+  column: base
+dealer_contract_details.sum_cost_per_lic:
+  table: dealer_contract_details
+  agg: sum
+  column: cost_per_lic
+dealer_contract_details.avg_cost_per_lic:
+  table: dealer_contract_details
+  agg: avg
+  column: cost_per_lic
+dealer_contract_details.sum_cost_new_lic:
+  table: dealer_contract_details
+  agg: sum
+  column: cost_new_lic
+dealer_contract_details.avg_cost_new_lic:
+  table: dealer_contract_details
+  agg: avg
+  column: cost_new_lic
+dealer_contract_details.sum_lic_count:
+  table: dealer_contract_details
+  agg: sum
+  column: lic_count
+dealer_contract_details.avg_lic_count:
+  table: dealer_contract_details
+  agg: avg
+  column: lic_count
+dealer_contract_details.sum_total_monthly_billing:
+  table: dealer_contract_details
+  agg: sum
+  column: total_monthly_billing
+dealer_contract_details.avg_total_monthly_billing:
+  table: dealer_contract_details
+  agg: avg
+  column: total_monthly_billing
+dealer_templates.count_rows:
+  table: dealer_templates
+  agg: count
+  expr: '*'
+dealer_unused_contents.count_rows:
+  table: dealer_unused_contents
+  agg: count
+  expr: '*'
+dealer_unused_contents.sum_for_deletion:
+  table: dealer_unused_contents
+  agg: sum
+  column: for_deletion
+dealer_unused_contents.avg_for_deletion:
+  table: dealer_unused_contents
+  agg: avg
+  column: for_deletion
+dealer_unused_contents.sum_days_unused:
+  table: dealer_unused_contents
+  agg: sum
+  column: days_unused
+dealer_unused_contents.avg_days_unused:
+  table: dealer_unused_contents
+  agg: avg
+  column: days_unused
+dealer_values.count_rows:
+  table: dealer_values
+  agg: count
+  expr: '*'
+dealer_values.sum_month1:
+  table: dealer_values
+  agg: sum
+  column: month1
+dealer_values.avg_month1:
+  table: dealer_values
+  agg: avg
+  column: month1
+dealer_values.sum_month19:
+  table: dealer_values
+  agg: sum
+  column: month19
+dealer_values.avg_month19:
+  table: dealer_values
+  agg: avg
+  column: month19
+dealer_values.sum_month25:
+  table: dealer_values
+  agg: sum
+  column: month25
+dealer_values.avg_month25:
+  table: dealer_values
+  agg: avg
+  column: month25
+dealer_values.sum_month31:
+  table: dealer_values
+  agg: sum
+  column: month31
+dealer_values.avg_month31:
+  table: dealer_values
+  agg: avg
+  column: month31
+dealer_values.sum_month37:
+  table: dealer_values
+  agg: sum
+  column: month37
+dealer_values.avg_month37:
+  table: dealer_values
+  agg: avg
+  column: month37
+dealer_values.sum_base_fee:
+  table: dealer_values
+  agg: sum
+  column: base_fee
+dealer_values.avg_base_fee:
+  table: dealer_values
+  agg: avg
+  column: base_fee
+dealer_values.sum_per_license:
+  table: dealer_values
+  agg: sum
+  column: per_license
+dealer_values.avg_per_license:
+  table: dealer_values
+  agg: avg
+  column: per_license
+dealer_values.sum_billing:
+  table: dealer_values
+  agg: sum
+  column: billing
+dealer_values.avg_billing:
+  table: dealer_values
+  agg: avg
+  column: billing
+dealer_values.sum_billable_licenses:
+  table: dealer_values
+  agg: sum
+  column: billable_licenses
+dealer_values.avg_billable_licenses:
+  table: dealer_values
+  agg: avg
+  column: billable_licenses
+dealer_values.sum_license_price_new:
+  table: dealer_values
+  agg: sum
+  column: license_price_new
+dealer_values.avg_license_price_new:
+  table: dealer_values
+  agg: avg
+  column: license_price_new
+dealer_values.sum_billing_date:
+  table: dealer_values
+  agg: sum
+  column: billing_date
+dealer_values.avg_billing_date:
+  table: dealer_values
+  agg: avg
+  column: billing_date
+dealer_values.sum_auto_charge:
+  table: dealer_values
+  agg: sum
+  column: auto_charge
+dealer_values.avg_auto_charge:
+  table: dealer_values
+  agg: avg
+  column: auto_charge
+dealers.count_rows:
+  table: dealers
+  agg: count
+  expr: '*'
+dealers.sum_license_count:
+  table: dealers
+  agg: sum
+  column: license_count
+dealers.avg_license_count:
+  table: dealers
+  agg: avg
+  column: license_count
+dealers.sum_player_count:
+  table: dealers
+  agg: sum
+  column: player_count
+dealers.avg_player_count:
+  table: dealers
+  agg: avg
+  column: player_count
+dealers_contract_files.count_rows:
+  table: dealers_contract_files
+  agg: count
+  expr: '*'
+dealers_new.count_rows:
+  table: dealers_new
+  agg: count
+  expr: '*'
+dealers_new.sum_license_count:
+  table: dealers_new
+  agg: sum
+  column: license_count
+dealers_new.avg_license_count:
+  table: dealers_new
+  agg: avg
+  column: license_count
+dealers_new.sum_player_count:
+  table: dealers_new
+  agg: sum
+  column: player_count
+dealers_new.avg_player_count:
+  table: dealers_new
+  agg: avg
+  column: player_count
+dealers_territory_files.count_rows:
+  table: dealers_territory_files
+  agg: count
+  expr: '*'
+dma.count_rows:
+  table: dma
+  agg: count
+  expr: '*'
+dma.sum_population:
+  table: dma
+  agg: sum
+  column: population
+dma.avg_population:
+  table: dma
+  agg: avg
+  column: population
+dma.sum_dma_rank:
+  table: dma
+  agg: sum
+  column: dma_rank
+dma.avg_dma_rank:
+  table: dma
+  agg: avg
+  column: dma_rank
+dma.sum_dma_pct:
+  table: dma
+  agg: sum
+  column: dma_pct
+dma.avg_dma_pct:
+  table: dma
+  agg: avg
+  column: dma_pct
+feed_fillers.count_rows:
+  table: feed_fillers
+  agg: count
+  expr: '*'
+feed_fillers.sum_group:
+  table: feed_fillers
+  agg: sum
+  column: group
+feed_fillers.avg_group:
+  table: feed_fillers
+  agg: avg
+  column: group
+feed_fillers.sum_min:
+  table: feed_fillers
+  agg: sum
+  column: min
+feed_fillers.avg_min:
+  table: feed_fillers
+  agg: avg
+  column: min
+feed_global_settings.count_rows:
+  table: feed_global_settings
+  agg: count
+  expr: '*'
+feed_global_settings.sum_image_animation:
+  table: feed_global_settings
+  agg: sum
+  column: image_animation
+feed_global_settings.avg_image_animation:
+  table: feed_global_settings
+  agg: avg
+  column: image_animation
+feed_global_settings.sum_header_image_size:
+  table: feed_global_settings
+  agg: sum
+  column: header_image_size
+feed_global_settings.avg_header_image_size:
+  table: feed_global_settings
+  agg: avg
+  column: header_image_size
+feed_news.count_rows:
+  table: feed_news
+  agg: count
+  expr: '*'
+feed_slides.count_rows:
+  table: feed_slides
+  agg: count
+  expr: '*'
+feed_slides.sum_duration:
+  table: feed_slides
+  agg: sum
+  column: duration
+feed_slides.avg_duration:
+  table: feed_slides
+  agg: avg
+  column: duration
+feed_slides.sum_sequence:
+  table: feed_slides
+  agg: sum
+  column: sequence
+feed_slides.avg_sequence:
+  table: feed_slides
+  agg: avg
+  column: sequence
+feed_types.count_rows:
+  table: feed_types
+  agg: count
+  expr: '*'
+feed_weathers.count_rows:
+  table: feed_weathers
+  agg: count
+  expr: '*'
+feed_weathers.sum_number_days:
+  table: feed_weathers
+  agg: sum
+  column: number_days
+feed_weathers.avg_number_days:
+  table: feed_weathers
+  agg: avg
+  column: number_days
+feed_weathers.sum_header_image_size:
+  table: feed_weathers
+  agg: sum
+  column: header_image_size
+feed_weathers.avg_header_image_size:
+  table: feed_weathers
+  agg: avg
+  column: header_image_size
+feed_weathers.sum_footer_image_size:
+  table: feed_weathers
+  agg: sum
+  column: footer_image_size
+feed_weathers.avg_footer_image_size:
+  table: feed_weathers
+  agg: avg
+  column: footer_image_size
+feeds.count_rows:
+  table: feeds
+  agg: count
+  expr: '*'
+field_group_fields.count_rows:
+  table: field_group_fields
+  agg: count
+  expr: '*'
+field_group_fields.sum_field_length:
+  table: field_group_fields
+  agg: sum
+  column: field_length
+field_group_fields.avg_field_length:
+  table: field_group_fields
+  agg: avg
+  column: field_length
+field_group_values.count_rows:
+  table: field_group_values
+  agg: count
+  expr: '*'
+field_groups.count_rows:
+  table: field_groups
+  agg: count
+  expr: '*'
+filler_contents.count_rows:
+  table: filler_contents
+  agg: count
+  expr: '*'
+filler_contents.sum_sorting:
+  table: filler_contents
+  agg: sum
+  column: sorting
+filler_contents.avg_sorting:
+  table: filler_contents
+  agg: avg
+  column: sorting
+filler_contents.sum_duration:
+  table: filler_contents
+  agg: sum
+  column: duration
+filler_contents.avg_duration:
+  table: filler_contents
+  agg: avg
+  column: duration
+filler_contents.sum_is_converted:
+  table: filler_contents
+  agg: sum
+  column: is_converted
+filler_contents.avg_is_converted:
+  table: filler_contents
+  agg: avg
+  column: is_converted
+filler_contents_schedule.count_rows:
+  table: filler_contents_schedule
+  agg: count
+  expr: '*'
+filler_contents_schedule.sum_type:
+  table: filler_contents_schedule
+  agg: sum
+  column: type
+filler_contents_schedule.avg_type:
+  table: filler_contents_schedule
+  agg: avg
+  column: type
+filler_contents_schedule.sum_recurring:
+  table: filler_contents_schedule
+  agg: sum
+  column: recurring
+filler_contents_schedule.avg_recurring:
+  table: filler_contents_schedule
+  agg: avg
+  column: recurring
+filler_contents_schedule.sum_live_stream:
+  table: filler_contents_schedule
+  agg: sum
+  column: live_stream
+filler_contents_schedule.avg_live_stream:
+  table: filler_contents_schedule
+  agg: avg
+  column: live_stream
+filler_contents_schedule.sum_alternate_week:
+  table: filler_contents_schedule
+  agg: sum
+  column: alternate_week
+filler_contents_schedule.avg_alternate_week:
+  table: filler_contents_schedule
+  agg: avg
+  column: alternate_week
+filler_group_blacklisted.count_rows:
+  table: filler_group_blacklisted
+  agg: count
+  expr: '*'
+filler_group_blacklisted.sum_type:
+  table: filler_group_blacklisted
+  agg: sum
+  column: type
+filler_group_blacklisted.avg_type:
+  table: filler_group_blacklisted
+  agg: avg
+  column: type
+filler_group_schedules.count_rows:
+  table: filler_group_schedules
+  agg: count
+  expr: '*'
+filler_group_schedules.sum_recurring:
+  table: filler_group_schedules
+  agg: sum
+  column: recurring
+filler_group_schedules.avg_recurring:
+  table: filler_group_schedules
+  agg: avg
+  column: recurring
+filler_groups.count_rows:
+  table: filler_groups
+  agg: count
+  expr: '*'
+filler_groups.sum_paired:
+  table: filler_groups
+  agg: sum
+  column: paired
+filler_groups.avg_paired:
+  table: filler_groups
+  agg: avg
+  column: paired
+filler_groups.sum_role:
+  table: filler_groups
+  agg: sum
+  column: role
+filler_groups.avg_role:
+  table: filler_groups
+  agg: avg
+  column: role
+filler_groups.sum_admin_only:
+  table: filler_groups
+  agg: sum
+  column: admin_only
+filler_groups.avg_admin_only:
+  table: filler_groups
+  agg: avg
+  column: admin_only
+filler_logs.count_rows:
+  table: filler_logs
+  agg: count
+  expr: '*'
+filler_logs.sum_current_index:
+  table: filler_logs
+  agg: sum
+  column: current_index
+filler_logs.avg_current_index:
+  table: filler_logs
+  agg: avg
+  column: current_index
+filler_playlist_contents.count_rows:
+  table: filler_playlist_contents
+  agg: count
+  expr: '*'
+filler_playlist_dealers.count_rows:
+  table: filler_playlist_dealers
+  agg: count
+  expr: '*'
+filler_playlist_groups.count_rows:
+  table: filler_playlist_groups
+  agg: count
+  expr: '*'
+filler_playlist_groups.sum_quantity:
+  table: filler_playlist_groups
+  agg: sum
+  column: quantity
+filler_playlist_groups.avg_quantity:
+  table: filler_playlist_groups
+  agg: avg
+  column: quantity
+filler_playlists.count_rows:
+  table: filler_playlists
+  agg: count
+  expr: '*'
+filler_playlists.sum_role:
+  table: filler_playlists
+  agg: sum
+  column: role
+filler_playlists.avg_role:
+  table: filler_playlists
+  agg: avg
+  column: role
+filler_playlists_20240305.count_rows:
+  table: filler_playlists_20240305
+  agg: count
+  expr: '*'
+filler_playlists_20240305.sum_role:
+  table: filler_playlists_20240305
+  agg: sum
+  column: role
+filler_playlists_20240305.avg_role:
+  table: filler_playlists_20240305
+  agg: avg
+  column: role
+global_settings.count_rows:
+  table: global_settings
+  agg: count
+  expr: '*'
+global_settings.sum_id:
+  table: global_settings
+  agg: sum
+  column: id
+global_settings.avg_id:
+  table: global_settings
+  agg: avg
+  column: id
+host_activity_logs.count_rows:
+  table: host_activity_logs
+  agg: count
+  expr: '*'
+host_field_groups.count_rows:
+  table: host_field_groups
+  agg: count
+  expr: '*'
+host_files.count_rows:
+  table: host_files
+  agg: count
+  expr: '*'
+host_programmatic.count_rows:
+  table: host_programmatic
+  agg: count
+  expr: '*'
+host_support_tickets.count_rows:
+  table: host_support_tickets
+  agg: count
+  expr: '*'
+hosts.count_rows:
+  table: hosts
+  agg: count
+  expr: '*'
+hosts_import.count_rows:
+  table: hosts_import
+  agg: count
+  expr: '*'
+hosts_import.sum_id:
+  table: hosts_import
+  agg: sum
+  column: id
+hosts_import.avg_id:
+  table: hosts_import
+  agg: avg
+  column: id
+installation_checklist_items.count_rows:
+  table: installation_checklist_items
+  agg: count
+  expr: '*'
+installation_checklist_items.sum_seq:
+  table: installation_checklist_items
+  agg: sum
+  column: seq
+installation_checklist_items.avg_seq:
+  table: installation_checklist_items
+  agg: avg
+  column: seq
+installation_checklists.count_rows:
+  table: installation_checklists
+  agg: count
+  expr: '*'
+installation_checklists.sum_seq:
+  table: installation_checklists
+  agg: sum
+  column: seq
+installation_checklists.avg_seq:
+  table: installation_checklists
+  agg: avg
+  column: seq
+license_favorites.count_rows:
+  table: license_favorites
+  agg: count
+  expr: '*'
+license_installation_checklists.count_rows:
+  table: license_installation_checklists
+  agg: count
+  expr: '*'
+license_installation_checklists.sum_is_done:
+  table: license_installation_checklists
+  agg: sum
+  column: is_done
+license_installation_checklists.avg_is_done:
+  table: license_installation_checklists
+  agg: avg
+  column: is_done
+license_playlist_contents.count_rows:
+  table: license_playlist_contents
+  agg: count
+  expr: '*'
+license_screens.count_rows:
+  table: license_screens
+  agg: count
+  expr: '*'
+licenses.count_rows:
+  table: licenses
+  agg: count
+  expr: '*'
+licenses.sum_is_registered:
+  table: licenses
+  agg: sum
+  column: is_registered
+licenses.avg_is_registered:
+  table: licenses
+  agg: avg
+  column: is_registered
+licenses.sum_is_activated:
+  table: licenses
+  agg: sum
+  column: is_activated
+licenses.avg_is_activated:
+  table: licenses
+  agg: avg
+  column: is_activated
+licenses.sum_player_status:
+  table: licenses
+  agg: sum
+  column: player_status
+licenses.avg_player_status:
+  table: licenses
+  agg: avg
+  column: player_status
+licenses.sum_pi_status:
+  table: licenses
+  agg: sum
+  column: pi_status
+licenses.avg_pi_status:
+  table: licenses
+  agg: avg
+  column: pi_status
+licenses.sum_sequence:
+  table: licenses
+  agg: sum
+  column: sequence
+licenses.avg_sequence:
+  table: licenses
+  agg: avg
+  column: sequence
+licenses.sum_display_status:
+  table: licenses
+  agg: sum
+  column: display_status
+licenses.avg_display_status:
+  table: licenses
+  agg: avg
+  column: display_status
+licenses.sum_screenshot_settings:
+  table: licenses
+  agg: sum
+  column: screenshot_settings
+licenses.avg_screenshot_settings:
+  table: licenses
+  agg: avg
+  column: screenshot_settings
+licenses.sum_speedtest_settings:
+  table: licenses
+  agg: sum
+  column: speedtest_settings
+licenses.avg_speedtest_settings:
+  table: licenses
+  agg: avg
+  column: speedtest_settings
+licenses.sum_boot_delay:
+  table: licenses
+  agg: sum
+  column: boot_delay
+licenses.avg_boot_delay:
+  table: licenses
+  agg: avg
+  column: boot_delay
+licenses.sum_email_settings:
+  table: licenses
+  agg: sum
+  column: email_settings
+licenses.avg_email_settings:
+  table: licenses
+  agg: avg
+  column: email_settings
+licenses.sum_notification_settings:
+  table: licenses
+  agg: sum
+  column: notification_settings
+licenses.avg_notification_settings:
+  table: licenses
+  agg: avg
+  column: notification_settings
+licenses.sum_tvdisplay_settings:
+  table: licenses
+  agg: sum
+  column: tvdisplay_settings
+licenses.avg_tvdisplay_settings:
+  table: licenses
+  agg: avg
+  column: tvdisplay_settings
+licenses.sum_is_cec_enabled:
+  table: licenses
+  agg: sum
+  column: is_cec_enabled
+licenses.avg_is_cec_enabled:
+  table: licenses
+  agg: avg
+  column: is_cec_enabled
+licenses.sum_is_cec_ctl_enabled:
+  table: licenses
+  agg: sum
+  column: is_cec_ctl_enabled
+licenses.avg_is_cec_ctl_enabled:
+  table: licenses
+  agg: avg
+  column: is_cec_ctl_enabled
+licenses.sum_fast_edge_monitoring_tool:
+  table: licenses
+  agg: sum
+  column: fast_edge_monitoring_tool
+licenses.avg_fast_edge_monitoring_tool:
+  table: licenses
+  agg: avg
+  column: fast_edge_monitoring_tool
+licenses.sum_resource_settings:
+  table: licenses
+  agg: sum
+  column: resource_settings
+licenses.avg_resource_settings:
+  table: licenses
+  agg: avg
+  column: resource_settings
+licenses.sum_display_control_settings:
+  table: licenses
+  agg: sum
+  column: display_control_settings
+licenses.avg_display_control_settings:
+  table: licenses
+  agg: avg
+  column: display_control_settings
+licenses_acquired.count_rows:
+  table: licenses_acquired
+  agg: count
+  expr: '*'
+licenses_acquired.sum_is_transferred:
+  table: licenses_acquired
+  agg: sum
+  column: is_transferred
+licenses_acquired.avg_is_transferred:
+  table: licenses_acquired
+  agg: avg
+  column: is_transferred
+news_cron.count_rows:
+  table: news_cron
+  agg: count
+  expr: '*'
+notification_logs.count_rows:
+  table: notification_logs
+  agg: count
+  expr: '*'
+notification_logs.sum_notification_id:
+  table: notification_logs
+  agg: sum
+  column: notification_id
+notification_logs.avg_notification_id:
+  table: notification_logs
+  agg: avg
+  column: notification_id
+notification_logs.sum_type:
+  table: notification_logs
+  agg: sum
+  column: type
+notification_logs.avg_type:
+  table: notification_logs
+  agg: avg
+  column: type
+notification_logs.sum_is_sent:
+  table: notification_logs
+  agg: sum
+  column: is_sent
+notification_logs.avg_is_sent:
+  table: notification_logs
+  agg: avg
+  column: is_sent
+notification_logs.sum_is_opened:
+  table: notification_logs
+  agg: sum
+  column: is_opened
+notification_logs.avg_is_opened:
+  table: notification_logs
+  agg: avg
+  column: is_opened
+notification_logs.sum_source:
+  table: notification_logs
+  agg: sum
+  column: source
+notification_logs.avg_source:
+  table: notification_logs
+  agg: avg
+  column: source
+notifications.count_rows:
+  table: notifications
+  agg: count
+  expr: '*'
+notifications.sum_type:
+  table: notifications
+  agg: sum
+  column: type
+notifications.avg_type:
+  table: notifications
+  agg: avg
+  column: type
+notifications.sum_open:
+  table: notifications
+  agg: sum
+  column: open
+notifications.avg_open:
+  table: notifications
+  agg: avg
+  column: open
+orders_viewed.count_rows:
+  table: orders_viewed
+  agg: count
+  expr: '*'
+orders_viewed.sum_has_viewed:
+  table: orders_viewed
+  agg: sum
+  column: has_viewed
+orders_viewed.avg_has_viewed:
+  table: orders_viewed
+  agg: avg
+  column: has_viewed
+permissions.count_rows:
+  table: permissions
+  agg: count
+  expr: '*'
+permissions.sum_permission_id:
+  table: permissions
+  agg: sum
+  column: permission_id
+permissions.avg_permission_id:
+  table: permissions
+  agg: avg
+  column: permission_id
+placer_dumps.count_rows:
+  table: placer_dumps
+  agg: count
+  expr: '*'
+placer_dumps.sum_foot_traffic:
+  table: placer_dumps
+  agg: sum
+  column: foot_traffic
+placer_dumps.avg_foot_traffic:
+  table: placer_dumps
+  agg: avg
+  column: foot_traffic
+placer_dumps.sum_average_dwell_time:
+  table: placer_dumps
+  agg: sum
+  column: average_dwell_time
+placer_dumps.avg_average_dwell_time:
+  table: placer_dumps
+  agg: avg
+  column: average_dwell_time
+placers.count_rows:
+  table: placers
+  agg: count
+  expr: '*'
+player_app_versions.count_rows:
+  table: player_app_versions
+  agg: count
+  expr: '*'
+player_apps.count_rows:
+  table: player_apps
+  agg: count
+  expr: '*'
+player_asset_server.count_rows:
+  table: player_asset_server
+  agg: count
+  expr: '*'
+player_ui.count_rows:
+  table: player_ui
+  agg: count
+  expr: '*'
+playlist_content_credits.count_rows:
+  table: playlist_content_credits
+  agg: count
+  expr: '*'
+playlist_content_credits.sum_credits:
+  table: playlist_content_credits
+  agg: sum
+  column: credits
+playlist_content_credits.avg_credits:
+  table: playlist_content_credits
+  agg: avg
+  column: credits
+playlist_content_credits.sum_balance:
+  table: playlist_content_credits
+  agg: sum
+  column: balance
+playlist_content_credits.avg_balance:
+  table: playlist_content_credits
+  agg: avg
+  column: balance
+playlist_contents.count_rows:
+  table: playlist_contents
+  agg: count
+  expr: '*'
+playlist_contents.sum_is_full_screen:
+  table: playlist_contents
+  agg: sum
+  column: is_full_screen
+playlist_contents.avg_is_full_screen:
+  table: playlist_contents
+  agg: avg
+  column: is_full_screen
+playlist_contents.sum_seq:
+  table: playlist_contents
+  agg: sum
+  column: seq
+playlist_contents.avg_seq:
+  table: playlist_contents
+  agg: avg
+  column: seq
+playlist_contents.sum_duration:
+  table: playlist_contents
+  agg: sum
+  column: duration
+playlist_contents.avg_duration:
+  table: playlist_contents
+  agg: avg
+  column: duration
+playlist_contents.sum_frequency:
+  table: playlist_contents
+  agg: sum
+  column: frequency
+playlist_contents.avg_frequency:
+  table: playlist_contents
+  agg: avg
+  column: frequency
+playlist_contents.sum_credits_enabled:
+  table: playlist_contents
+  agg: sum
+  column: credits_enabled
+playlist_contents.avg_credits_enabled:
+  table: playlist_contents
+  agg: avg
+  column: credits_enabled
+playlist_contents_schedule.count_rows:
+  table: playlist_contents_schedule
+  agg: count
+  expr: '*'
+playlist_contents_schedule.sum_type:
+  table: playlist_contents_schedule
+  agg: sum
+  column: type
+playlist_contents_schedule.avg_type:
+  table: playlist_contents_schedule
+  agg: avg
+  column: type
+playlist_contents_schedule.sum_live_stream:
+  table: playlist_contents_schedule
+  agg: sum
+  column: live_stream
+playlist_contents_schedule.avg_live_stream:
+  table: playlist_contents_schedule
+  agg: avg
+  column: live_stream
+playlist_contents_schedule.sum_alternate_week:
+  table: playlist_contents_schedule
+  agg: sum
+  column: alternate_week
+playlist_contents_schedule.avg_alternate_week:
+  table: playlist_contents_schedule
+  agg: avg
+  column: alternate_week
+playlists.count_rows:
+  table: playlists
+  agg: count
+  expr: '*'
+playlists.sum_is_migrated:
+  table: playlists
+  agg: sum
+  column: is_migrated
+playlists.avg_is_migrated:
+  table: playlists
+  agg: avg
+  column: is_migrated
+purchase_items.count_rows:
+  table: purchase_items
+  agg: count
+  expr: '*'
+release_notes.count_rows:
+  table: release_notes
+  agg: count
+  expr: '*'
+resource_logs.count_rows:
+  table: resource_logs
+  agg: count
+  expr: '*'
+resource_logs.sum_ram_usage:
+  table: resource_logs
+  agg: sum
+  column: ram_usage
+resource_logs.avg_ram_usage:
+  table: resource_logs
+  agg: avg
+  column: ram_usage
+resource_logs.sum_cpu_usage:
+  table: resource_logs
+  agg: sum
+  column: cpu_usage
+resource_logs.avg_cpu_usage:
+  table: resource_logs
+  agg: avg
+  column: cpu_usage
+roles.count_rows:
+  table: roles
+  agg: count
+  expr: '*'
+screen_template_zone_playlists.count_rows:
+  table: screen_template_zone_playlists
+  agg: count
+  expr: '*'
+screen_types.count_rows:
+  table: screen_types
+  agg: count
+  expr: '*'
+screens.count_rows:
+  table: screens
+  agg: count
+  expr: '*'
+states_us_ca.count_rows:
+  table: states_us_ca
+  agg: count
+  expr: '*'
+stripe_users.count_rows:
+  table: stripe_users
+  agg: count
+  expr: '*'
+tag_details.count_rows:
+  table: tag_details
+  agg: count
+  expr: '*'
+tag_details.sum_tag_type_id:
+  table: tag_details
+  agg: sum
+  column: tag_type_id
+tag_details.avg_tag_type_id:
+  table: tag_details
+  agg: avg
+  column: tag_type_id
+tag_types.count_rows:
+  table: tag_types
+  agg: count
+  expr: '*'
+tag_types.sum_tag_type_id:
+  table: tag_types
+  agg: sum
+  column: tag_type_id
+tag_types.avg_tag_type_id:
+  table: tag_types
+  agg: avg
+  column: tag_type_id
+tags.count_rows:
+  table: tags
+  agg: count
+  expr: '*'
+tags.sum_role:
+  table: tags
+  agg: sum
+  column: role
+tags.avg_role:
+  table: tags
+  agg: avg
+  column: role
+tags.sum_exclude:
+  table: tags
+  agg: sum
+  column: exclude
+tags.avg_exclude:
+  table: tags
+  agg: avg
+  column: exclude
+template_zones.count_rows:
+  table: template_zones
+  agg: count
+  expr: '*'
+template_zones.sum_x_pos:
+  table: template_zones
+  agg: sum
+  column: x_pos
+template_zones.avg_x_pos:
+  table: template_zones
+  agg: avg
+  column: x_pos
+template_zones.sum_y_pos:
+  table: template_zones
+  agg: sum
+  column: y_pos
+template_zones.avg_y_pos:
+  table: template_zones
+  agg: avg
+  column: y_pos
+template_zones.sum_height:
+  table: template_zones
+  agg: sum
+  column: height
+template_zones.avg_height:
+  table: template_zones
+  agg: avg
+  column: height
+template_zones.sum_width:
+  table: template_zones
+  agg: sum
+  column: width
+template_zones.avg_width:
+  table: template_zones
+  agg: avg
+  column: width
+template_zones.sum_order:
+  table: template_zones
+  agg: sum
+  column: order
+template_zones.avg_order:
+  table: template_zones
+  agg: avg
+  column: order
+templates.count_rows:
+  table: templates
+  agg: count
+  expr: '*'
+time_zones.count_rows:
+  table: time_zones
+  agg: count
+  expr: '*'
+tv_brands.count_rows:
+  table: tv_brands
+  agg: count
+  expr: '*'
+user_activity_logs.count_rows:
+  table: user_activity_logs
+  agg: count
+  expr: '*'
+user_roles.count_rows:
+  table: user_roles
+  agg: count
+  expr: '*'
+users.count_rows:
+  table: users
+  agg: count
+  expr: '*'
+users.sum_allow_email:
+  table: users
+  agg: sum
+  column: allow_email
+users.avg_allow_email:
+  table: users
+  agg: avg
+  column: allow_email
+users.sum_allow_target_release_permission:
+  table: users
+  agg: sum
+  column: allow_target_release_permission
+users.avg_allow_target_release_permission:
+  table: users
+  agg: avg
+  column: allow_target_release_permission
+webhooks.count_rows:
+  table: webhooks
+  agg: count
+  expr: '*'
+webhooks.sum_id:
+  table: webhooks
+  agg: sum
+  column: id
+webhooks.avg_id:
+  table: webhooks
+  agg: avg
+  column: id
+webhooks_convert.count_rows:
+  table: webhooks_convert
+  agg: count
+  expr: '*'
+webhooks_convert.sum_id:
+  table: webhooks_convert
+  agg: sum
+  column: id
+webhooks_convert.avg_id:
+  table: webhooks_convert
+  agg: avg
+  column: id
+websockets.count_rows:
+  table: websockets
+  agg: count
+  expr: '*'
+xml_settings.count_rows:
+  table: xml_settings
+  agg: count
+  expr: '*'

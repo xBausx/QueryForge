@@ -1,3 +1,423 @@
-hosts: hosts
-dealers: dealers
-licenses: licenses
+activities:
+  pk:
+  - activity_code
+  description: ''
+activity_logs:
+  pk:
+  - activity_log_id
+  description: ''
+advertiser_activity_logs:
+  pk: []
+  description: ''
+advertiser_deleted_contents_for_logs:
+  pk:
+  - content_id
+  description: ''
+advertisers:
+  pk:
+  - id
+  description: ''
+blacklisted_contents:
+  pk:
+  - blacklisted_content_id
+  description: ''
+categories:
+  pk:
+  - category_id
+  description: ''
+cities:
+  pk:
+  - id
+  description: ''
+cities_state_data:
+  pk:
+  - id
+  description: ''
+content_history_logs:
+  pk:
+  - log_id
+  description: ''
+content_play_logs:
+  pk:
+  - log_id
+  description: ''
+content_plays_daily:
+  pk:
+  - log_id
+  description: ''
+content_plays_daily_2024_july_august:
+  pk:
+  - log_id
+  description: ''
+content_plays_daily_logs:
+  pk:
+  - log_id
+  description: ''
+content_plays_daily_migration:
+  pk:
+  - log_date
+  - log_id
+  description: ''
+content_plays_daily_migration_params:
+  pk:
+  - param_id
+  description: ''
+content_plays_daily_replicate:
+  pk:
+  - log_id
+  description: ''
+content_plays_hourly:
+  pk:
+  - log_id
+  description: ''
+contents:
+  pk:
+  - content_id
+  description: ''
+countries:
+  pk:
+  - id
+  description: ''
+dealer_activity_logs:
+  pk: []
+  description: ''
+dealer_address_books:
+  pk:
+  - dealer_address_book_id
+  description: ''
+dealer_admins:
+  pk:
+  - id
+  description: ''
+dealer_contract_details:
+  pk:
+  - dealer_contract_id
+  description: ''
+dealer_templates:
+  pk:
+  - dealer_template_id
+  description: ''
+dealer_unused_contents:
+  pk:
+  - dealer_unused_content_id
+  description: ''
+dealer_values:
+  pk: []
+  description: ''
+dealers:
+  pk:
+  - dealer_id
+  description: ''
+dealers_contract_files:
+  pk:
+  - dealers_contract_file_id
+  description: ''
+dealers_new:
+  pk:
+  - dealer_id
+  description: ''
+dealers_territory_files:
+  pk:
+  - dealers_territory_file_id
+  description: ''
+dma:
+  pk:
+  - dma_id
+  description: ''
+feed_fillers:
+  pk:
+  - feed_filler_id
+  description: ''
+feed_global_settings:
+  pk:
+  - feed_global_setting_id
+  description: ''
+feed_news:
+  pk:
+  - feed_news_id
+  description: ''
+feed_slides:
+  pk:
+  - feed_slide_id
+  description: ''
+feed_types:
+  pk:
+  - feed_type_id
+  description: ''
+feed_weathers:
+  pk:
+  - feed_weather_id
+  description: ''
+feeds:
+  pk: []
+  description: ''
+field_group_fields:
+  pk:
+  - field_id
+  description: ''
+field_group_values:
+  pk:
+  - field_value_id
+  description: ''
+field_groups:
+  pk:
+  - field_group_id
+  description: ''
+filler_contents:
+  pk:
+  - filler_content_id
+  description: ''
+filler_contents_schedule:
+  pk:
+  - filler_contents_schedule_id
+  description: ''
+filler_group_blacklisted:
+  pk:
+  - filler_group_blacklisted_id
+  description: ''
+filler_group_schedules:
+  pk:
+  - id
+  description: ''
+filler_groups:
+  pk:
+  - filler_group_id
+  description: ''
+filler_logs:
+  pk:
+  - id
+  description: ''
+filler_playlist_contents:
+  pk:
+  - filler_playlist_contents_id
+  description: ''
+filler_playlist_dealers:
+  pk:
+  - filler_playlist_dealer_id
+  description: ''
+filler_playlist_groups:
+  pk:
+  - filler_playlist_group_id
+  description: ''
+filler_playlists:
+  pk:
+  - filler_playlist_id
+  description: ''
+filler_playlists_20240305:
+  pk:
+  - filler_playlist_id
+  description: ''
+global_settings:
+  pk:
+  - id
+  description: ''
+host_activity_logs:
+  pk:
+  - activity_log_id
+  description: ''
+host_field_groups:
+  pk:
+  - host_field_group_id
+  description: ''
+host_files:
+  pk:
+  - id
+  description: ''
+host_programmatic:
+  pk:
+  - programmatic_id
+  description: ''
+host_support_tickets:
+  pk:
+  - ticket_id
+  description: ''
+hosts:
+  pk:
+  - host_id
+  description: ''
+hosts_import:
+  pk:
+  - id
+  description: ''
+installation_checklist_items:
+  pk:
+  - installation_checklist_item_id
+  description: ''
+installation_checklists:
+  pk: []
+  description: ''
+license_favorites:
+  pk:
+  - license_favorite_id
+  description: ''
+license_installation_checklists:
+  pk:
+  - license_installation_checklist_id
+  description: ''
+license_playlist_contents:
+  pk:
+  - license_playlist_content_id
+  description: ''
+license_screens:
+  pk:
+  - license_screen_id
+  description: ''
+licenses:
+  pk:
+  - license_id
+  description: ''
+licenses_acquired:
+  pk:
+  - license_acquired_id
+  description: ''
+news_cron:
+  pk:
+  - id
+  description: ''
+notification_logs:
+  pk:
+  - notification_id
+  description: ''
+notifications:
+  pk:
+  - id
+  description: ''
+orders_viewed:
+  pk:
+  - order_id
+  description: ''
+permissions:
+  pk:
+  - permission_id
+  description: ''
+placer_dumps:
+  pk:
+  - placer_dump_id
+  description: ''
+placers:
+  pk:
+  - placer_id
+  description: ''
+player_app_versions:
+  pk:
+  - version_id
+  description: ''
+player_apps:
+  pk:
+  - app_id
+  description: ''
+player_asset_server:
+  pk:
+  - player_asset_server_key
+  description: ''
+player_ui:
+  pk:
+  - player_ui_key
+  description: ''
+playlist_content_credits:
+  pk:
+  - playlist_content_credit_id
+  description: ''
+playlist_contents:
+  pk:
+  - playlist_content_id
+  description: ''
+playlist_contents_schedule:
+  pk:
+  - playlist_contents_schedule_id
+  description: ''
+playlists:
+  pk:
+  - playlist_id
+  description: ''
+purchase_items:
+  pk:
+  - order_no
+  description: ''
+release_notes:
+  pk:
+  - release_note_id
+  description: ''
+resource_logs:
+  pk:
+  - resource_log_id
+  description: ''
+roles:
+  pk:
+  - role_id
+  description: ''
+screen_template_zone_playlists:
+  pk:
+  - screen_template_zone_playlist_id
+  description: ''
+screen_types:
+  pk:
+  - screen_type_id
+  description: ''
+screens:
+  pk:
+  - screen_id
+  description: ''
+states_us_ca:
+  pk:
+  - id
+  description: ''
+stripe_users:
+  pk:
+  - dealer_id
+  description: ''
+tag_details:
+  pk:
+  - tag_details_id
+  description: ''
+tag_types:
+  pk:
+  - tag_type_id
+  description: ''
+tags:
+  pk:
+  - tag_id
+  description: ''
+template_zones:
+  pk:
+  - template_zone_id
+  description: ''
+templates:
+  pk:
+  - template_id
+  description: ''
+time_zones:
+  pk:
+  - id
+  description: ''
+tv_brands:
+  pk:
+  - brand_id
+  description: ''
+user_activity_logs:
+  pk: []
+  description: ''
+user_roles:
+  pk:
+  - uer_role_id
+  description: ''
+users:
+  pk:
+  - user_id
+  description: ''
+webhooks:
+  pk:
+  - id
+  description: ''
+webhooks_convert:
+  pk:
+  - id
+  description: ''
+websockets:
+  pk:
+  - connection_id
+  description: ''
+xml_settings:
+  pk:
+  - id
+  description: ''

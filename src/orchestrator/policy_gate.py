@@ -1,131 +1,155 @@
-# src/orchestrator/policy_gate.py
 from __future__ import annotations
 
-import re
-from typing import Iterable, Optional
+"""
+Phase-1 Policy Gate (detail-mode enabled)
 
-import sqlglot
-from sqlglot import exp
+Validates and minimally amends a LogicalQueryRequest (LQR) before SQL compile.
+- Enforces single-table semantics
+- Verifies dimensions/metrics/projections exist and live on the base table
+- Allows **detail mode** (no metrics) if projections are present
+- Applies default LIMIT=100 when not provided
+- Blocks forbidden fields from `forbidden.yaml`
 
-from .errors import OrchestratorError, ErrorCode
+Errors use Phase-1 codes:
+  [MISSING_PARAMETER] [SCHEMA_MISSING] [SCHEMA_MISMATCH] [FORBIDDEN_FIELD]
 
+Usage (PowerShell one‑liner):
+  python -c "from orchestrator.router_runtime import DeterministicRouter; from orchestrator.policy_gate import apply_policy; from orchestrator.sql_ast_builder import compile_lqr_to_sql; r=DeterministicRouter(); lqr=r.route('latest advertisers'); lqr=apply_policy(lqr); print(compile_lqr_to_sql(lqr))"
+"""
 
-def enforce_policies(
-    sql: str,
-    *,
-    forbidden: Optional[Iterable[str]] = None,
-    default_limit: int = 100,
-    dialect: Optional[str] = None,
-) -> str:
-    """
-    Safety gate applied to the final SQL string.
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, Optional, Set
 
-    Policies enforced:
-      1) Strip comments; first token must be SELECT (no CTE/DDL/DML/multi-statement).
-      2) No forbidden fields/patterns (simple case-insensitive substring match).
-      3) Ensure all LIKE/ILIKE have ESCAPE '\\' (inject if absent).
-      4) LIMIT is required; inject default LIMIT if none present.
-      5) Re-parse and serialize canonically.
-    """
-    if not isinstance(sql, str) or not sql.strip():
-        raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, "Empty SQL provided to policy gate")
-
-    # 1) Block comments outright, then strip to normalize
-    if "--" in sql or "/*" in sql or "*/" in sql:
-        raise OrchestratorError(
-            ErrorCode.UNSUPPORTED_OPERATION,
-            "Comments are not allowed in generated SQL",
-        )
-    stripped = _strip_comments(sql).lstrip()
-
-    # Must start with SELECT (not WITH/INSERT/UPDATE/etc.)
-    if not stripped[:6].upper().startswith("SELECT"):
-        raise OrchestratorError(
-            ErrorCode.UNSUPPORTED_OPERATION,
-            "Only SELECT statements are allowed (first token must be SELECT)",
-        )
-
-    # Parse; must be exactly one statement; normalize to a Select node
-    try:
-        stmts = sqlglot.parse(stripped)
-    except Exception as e:
-        raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, f"Failed to parse SQL: {e}")
-
-    if not stmts:
-        raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, "No parseable statement found")
-    if len(stmts) != 1:
-        raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, "Multiple statements are not allowed")
-
-    node = stmts[0]
-    if isinstance(node, (exp.With, exp.Union, exp.Except, exp.Intersect)):
-        raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, "Only a single plain SELECT is allowed")
-    if not isinstance(node, exp.Select):
-        inner = node
-        if isinstance(node, exp.Paren) and isinstance(node.this, exp.Select):
-            inner = node.this
-        if not isinstance(inner, exp.Select):
-            raise OrchestratorError(ErrorCode.UNSUPPORTED_OPERATION, "Statement must be a SELECT")
-        node = inner  # normalize
-
-    # 2) (we'll compute canonical SQL after mutations) — Forbidden pattern scan happens later
-
-    # 3) Ensure LIKE/ILIKE all have ESCAPE '\\'
-    #    (do not alter the pattern; just attach ESCAPE if it's missing)
-    for like_node in list(node.find_all(exp.Like)):
-        if like_node.args.get("escape") is None:
-            like_node.set("escape", exp.Literal.string("\\"))
-
-    ILike = getattr(exp, "ILike", None)
-    if ILike is not None:
-        for ilike_node in list(node.find_all(ILike)):
-            if ilike_node.args.get("escape") is None:
-                ilike_node.set("escape", exp.Literal.string("\\"))
-
-    # 4) Inject default LIMIT if absent
-    if not _has_limit(node):
-        node.set("limit", exp.Limit(expression=exp.Literal.number(int(default_limit))))
-
-    # Canonicalize and check forbidden patterns on the final string
-    canonical_sql = node.sql(dialect=dialect).strip()
-    if forbidden:
-        hit = _find_forbidden(canonical_sql, forbidden)
-        if hit:
-            raise OrchestratorError(
-                ErrorCode.FORBIDDEN_FIELD,
-                f"Use of forbidden field/pattern detected: '{hit}'",
-            )
-
-    return canonical_sql
+from .config_loader import load_all_configs
+from .models import LogicalQueryRequest, DEFAULT_LIMIT
 
 
-# ---------------------------
-# Internals
-# ---------------------------
+@dataclass
+class PolicyError(Exception):
+    code: str
+    reason: str
 
-_LINE_COMMENT = re.compile(r"--[^\n]*")
-_HASH_COMMENT = re.compile(r"#[^\n]*")
-_BLOCK_COMMENT = re.compile(r"/\*.*?\*/", flags=re.DOTALL)
-
-
-def _strip_comments(sql: str) -> str:
-    s = _BLOCK_COMMENT.sub("", sql)
-    s = _LINE_COMMENT.sub("", s)
-    s = _HASH_COMMENT.sub("", s)
-    return s
+    def __str__(self) -> str:  # pragma: no cover
+        return f"[{self.code}] {self.reason}"
 
 
-def _find_forbidden(sql: str, forbidden: Iterable[str]) -> Optional[str]:
-    low = sql.lower()
-    for pat in forbidden:
-        if not pat:
+# ---------------- Surfaces ---------------- #
+
+class _Surfaces:
+    def __init__(self, *, entities: Dict[str, Any], fields: Dict[str, Any], dimensions: Dict[str, Any], metrics: Dict[str, Any], forbidden: Any) -> None:
+        self.tables: Set[str] = set((entities or {}).keys())
+        self.dimensions: Dict[str, Any] = dimensions or {}
+        self.metrics: Dict[str, Any] = metrics or {}
+        self.fields: Dict[str, Dict[str, Any]] = fields or {}
+        self.forbidden_fields: Set[str] = _extract_forbidden_fields(forbidden)
+
+    def has_field(self, qualified: str) -> bool:
+        if "." not in qualified:
+            return False
+        t, c = qualified.split(".", 1)
+        return t in self.fields and isinstance(self.fields[t], dict) and c in self.fields[t]
+
+def _extract_forbidden_fields(forbidden: Any) -> set[str]:
+    out: set[str] = set()
+    if forbidden is None:
+        return out
+    if isinstance(forbidden, list):
+        out.update(str(x) for x in forbidden if isinstance(x, str))
+        return out
+    if isinstance(forbidden, dict):
+        if isinstance(forbidden.get("fields"), list):
+            out.update(str(x) for x in forbidden["fields"] if isinstance(x, str))
+        for k in list(forbidden.keys()):
+            if isinstance(k, str) and "." in k:
+                out.add(k)
+        return out
+    return out
+
+def _build_surfaces(config_dir: Optional[Path]) -> _Surfaces:
+    bundle = load_all_configs((config_dir or Path("src/orchestrator/config")).resolve())
+    return _Surfaces(
+        entities=bundle.entities,
+        fields=bundle.fields,
+        dimensions=bundle.dimensions,
+        metrics=bundle.metrics,
+        forbidden=bundle.forbidden,
+    )
+
+
+# ---------------- Core checks ---------------- #
+
+def _ensure_base_table(lqr: LogicalQueryRequest, s: _Surfaces) -> None:
+    if not lqr.base_table:
+        raise PolicyError("MISSING_PARAMETER", "base_table is required")
+    if lqr.base_table not in s.tables:
+        raise PolicyError("SCHEMA_MISSING", f"Unknown base_table '{lqr.base_table}'")
+
+
+def _ensure_dims(lqr: LogicalQueryRequest, s: _Surfaces) -> None:
+    for d in lqr.dimensions:
+        if d not in s.dimensions:
+            raise PolicyError("SCHEMA_MISSING", f"Unknown dimension '{d}'")
+        if not d.startswith(lqr.base_table + "."):
+            raise PolicyError("SCHEMA_MISMATCH", f"Dimension '{d}' is not on base_table '{lqr.base_table}'")
+        if d in s.forbidden_fields:
+            raise PolicyError("FORBIDDEN_FIELD", f"Dimension '{d}' is forbidden by policy")
+
+
+def _ensure_metrics_or_projections(lqr: LogicalQueryRequest, s: _Surfaces) -> None:
+    has_metrics = bool(lqr.metrics)
+    has_projections = bool(lqr.projections)
+    if not has_metrics and not has_projections:
+        raise PolicyError("MISSING_PARAMETER", "Provide at least one metric or projection")
+
+    # Metrics checks (if present)
+    for m in lqr.metrics:
+        if m not in s.metrics:
+            raise PolicyError("SCHEMA_MISSING", f"Unknown metric '{m}'")
+        if not m.startswith(lqr.base_table + "."):
+            raise PolicyError("SCHEMA_MISMATCH", f"Metric '{m}' is not on base_table '{lqr.base_table}'")
+        if m in s.forbidden_fields:
+            raise PolicyError("FORBIDDEN_FIELD", f"Metric '{m}' is forbidden by policy")
+
+    # Projections checks (if present)
+    for p in lqr.projections:
+        if not s.has_field(p):
+            raise PolicyError("SCHEMA_MISSING", f"Unknown projection field '{p}'")
+        if not p.startswith(lqr.base_table + "."):
+            raise PolicyError("SCHEMA_MISMATCH", f"Projection '{p}' is not on base_table '{lqr.base_table}'")
+        if p in s.forbidden_fields:
+            raise PolicyError("FORBIDDEN_FIELD", f"Projection '{p}' is forbidden by policy")
+
+
+def _ensure_filters(lqr: LogicalQueryRequest, s: _Surfaces) -> None:
+    for f in lqr.filters:
+        field = f.field if isinstance(f.field, str) else None
+        if not field:
             continue
-        if pat.lower() in low:
-            return pat
-    return None
+        # If fully-qualified, enforce same-table
+        if "." in field and not field.startswith(lqr.base_table + "."):
+            raise PolicyError("SCHEMA_MISMATCH", f"Filter field '{field}' is not on base_table '{lqr.base_table}'")
+        if field in s.forbidden_fields:
+            raise PolicyError("FORBIDDEN_FIELD", f"Filter field '{field}' is forbidden by policy")
 
 
-def _has_limit(node: exp.Expression) -> bool:
-    if isinstance(node, exp.Select):
-        return node.args.get("limit") is not None
-    sel = node.find(exp.Select)
-    return bool(sel and sel.args.get("limit"))
+def _apply_defaults(lqr: LogicalQueryRequest) -> LogicalQueryRequest:
+    if lqr.limit is None:
+        lqr = lqr.model_copy(update={"limit": lqr.effective_limit(DEFAULT_LIMIT)})
+    return lqr
+
+
+# ---------------- Public API ---------------- #
+
+def apply_policy(lqr: LogicalQueryRequest, *, config_dir: Optional[Path] = None) -> LogicalQueryRequest:
+    """Validate and minimally amend the LQR.
+
+    Returns a (possibly updated) LQR or raises PolicyError with a coded message.
+    """
+    s = _build_surfaces(config_dir)
+    _ensure_base_table(lqr, s)
+    _ensure_dims(lqr, s)
+    _ensure_metrics_or_projections(lqr, s)
+    _ensure_filters(lqr, s)
+    lqr = _apply_defaults(lqr)
+    return lqr

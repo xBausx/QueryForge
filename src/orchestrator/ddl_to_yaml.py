@@ -1,12 +1,18 @@
 from __future__ import annotations
 
 """
-SQL AST Builder (Phase 1)
+SQL AST Builder (Phase 1 • Detail Mode enabled)
 
 Compiles a LogicalQueryRequest (LQR) into a single-table SELECT using SQLGlot.
 - Programmatic AST only (no string concatenation)
 - Re-parses final SQL to verify the first token is SELECT
 - MySQL dialect by default
+
+Now supports two modes:
+1) **Detail mode** – when `metrics` is empty and `projections` is non-empty.
+   Emits a plain SELECT of the requested columns (no GROUP BY).
+2) **Aggregate mode** – when `metrics` is non-empty. If `projections` are also
+   present, they are included and **auto-GROUPed** along with any dimensions.
 
 Public API:
     compile_lqr_to_sql(lqr: LogicalQueryRequest, *, config_dir: Path|None=None, dialect: str="mysql") -> str
@@ -100,7 +106,7 @@ def _compile_filter(f: Filter) -> exp.Expression:
     if op == Operator.GTE:
         return exp.GTE(this=col, expression=_lit(v))
     if op == Operator.LIKE:
-        # Ensure ESCAPE '\\' (Phase 1 requirement)
+        # Ensure ESCAPE '\' (Phase 1 requirement)
         return exp.Like(this=col, expression=_lit(v), escape=exp.Literal.string("\\"))
     if op == Operator.IN:
         assert isinstance(v, (list, tuple)) and v, "IN requires a non-empty list"
@@ -183,12 +189,15 @@ def compile_lqr_to_sql(
     if has_metrics and projection_cols:
         for t, c in projection_cols:
             col_e = exp.column(c, table=t)
-            select_items.insert(0, col_e.as_(c))  # keep dims/projections before metrics
+            select_items.insert(0, col_e.as_(c))  # keep dims first-ish
             group_by_items.append(col_e)
 
     # If NOT aggregating (detail mode), select projections (and any dims act as projections)
     if not has_metrics:
         # Treat dimensions as additional projections when no metrics are present
+        # (detail mode with explicit dims is equivalent to selecting those cols).
+        dim_names = [d.split(".", 1)[1] for d in lqr.dimensions]
+        # add projections first for stable order
         for t, c in projection_cols:
             select_items.append(exp.column(c, table=t).as_(c))
         for d in lqr.dimensions:

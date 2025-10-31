@@ -1,2 +1,0 @@
-{"label":"DEALER_VALUE","pattern":[{"LOWER":{"IN":["dealer","store"]}},{"IS_PUNCT":true,"OP":"?"},{"IS_SPACE":true,"OP":"*"},{"IS_ALPHA":true,"OP":"+"}]}
-{"label":"HOST_VALUE","pattern":[{"LOWER":"host"},{"IS_PUNCT":true,"OP":"?"},{"IS_SPACE":true,"OP":"*"},{"IS_ALPHA":true,"OP":"+"}]}
