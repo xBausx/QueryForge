@@ -1,1 +1,1107 @@
-{}
+activity_logs:
+  activity_logs.activity_code:
+    join:
+      'on': activity_logs.activity_log_id = activity_logs.activity_log_id
+      table: activity_logs
+      type: left
+advertiser_activity_logs:
+  activity_logs.activity_code:
+    join:
+      'on': advertiser_activity_logs.activity_log_id = activity_logs.activity_log_id
+      table: activity_logs
+      type: left
+advertiser_deleted_contents_for_logs:
+  contents.file_name:
+    join:
+      'on': advertiser_deleted_contents_for_logs.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': advertiser_deleted_contents_for_logs.content_id = contents.content_id
+      table: contents
+      type: left
+advertisers:
+  advertisers.name:
+    join:
+      'on': advertisers.advertiser_id = advertisers.id
+      table: advertisers
+      type: left
+  advertisers.postal_code:
+    join:
+      'on': advertisers.advertiser_id = advertisers.id
+      table: advertisers
+      type: left
+  dealers.business_name:
+    join:
+      'on': advertisers.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  users.first_name:
+    join:
+      'on': advertisers.user_id = users.user_id
+      table: users
+      type: left
+  users.last_name:
+    join:
+      'on': advertisers.user_id = users.user_id
+      table: users
+      type: left
+  users.middle_name:
+    join:
+      'on': advertisers.user_id = users.user_id
+      table: users
+      type: left
+blacklisted_contents:
+  contents.file_name:
+    join:
+      'on': blacklisted_contents.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': blacklisted_contents.content_id = contents.content_id
+      table: contents
+      type: left
+content_history_logs:
+  contents.file_name:
+    join:
+      'on': content_history_logs.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': content_history_logs.content_id = contents.content_id
+      table: contents
+      type: left
+  playlists.name:
+    join:
+      'on': content_history_logs.playlist_id = playlists.playlist_id
+      table: playlists
+      type: left
+  users.first_name:
+    join:
+      'on': content_history_logs.user_id = users.user_id
+      table: users
+      type: left
+  users.last_name:
+    join:
+      'on': content_history_logs.user_id = users.user_id
+      table: users
+      type: left
+  users.middle_name:
+    join:
+      'on': content_history_logs.user_id = users.user_id
+      table: users
+      type: left
+content_play_logs:
+  contents.file_name:
+    join:
+      'on': content_play_logs.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': content_play_logs.content_id = contents.content_id
+      table: contents
+      type: left
+content_plays_daily:
+  contents.file_name:
+    join:
+      'on': content_plays_daily.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': content_plays_daily.content_id = contents.content_id
+      table: contents
+      type: left
+  playlists.name:
+    join:
+      'on': content_plays_daily.playlist_id = playlists.playlist_id
+      table: playlists
+      type: left
+content_plays_daily_2024_july_august:
+  contents.file_name:
+    join:
+      'on': content_plays_daily_2024_july_august.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': content_plays_daily_2024_july_august.content_id = contents.content_id
+      table: contents
+      type: left
+  playlists.name:
+    join:
+      'on': content_plays_daily_2024_july_august.playlist_id = playlists.playlist_id
+      table: playlists
+      type: left
+content_plays_daily_logs:
+  contents.file_name:
+    join:
+      'on': content_plays_daily_logs.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': content_plays_daily_logs.content_id = contents.content_id
+      table: contents
+      type: left
+  playlists.name:
+    join:
+      'on': content_plays_daily_logs.playlist_id = playlists.playlist_id
+      table: playlists
+      type: left
+content_plays_daily_migration:
+  contents.file_name:
+    join:
+      'on': content_plays_daily_migration.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': content_plays_daily_migration.content_id = contents.content_id
+      table: contents
+      type: left
+  playlists.name:
+    join:
+      'on': content_plays_daily_migration.playlist_id = playlists.playlist_id
+      table: playlists
+      type: left
+content_plays_daily_replicate:
+  contents.file_name:
+    join:
+      'on': content_plays_daily_replicate.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': content_plays_daily_replicate.content_id = contents.content_id
+      table: contents
+      type: left
+  playlists.name:
+    join:
+      'on': content_plays_daily_replicate.playlist_id = playlists.playlist_id
+      table: playlists
+      type: left
+content_plays_hourly:
+  contents.file_name:
+    join:
+      'on': content_plays_hourly.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': content_plays_hourly.content_id = contents.content_id
+      table: contents
+      type: left
+  playlists.name:
+    join:
+      'on': content_plays_hourly.playlist_id = playlists.playlist_id
+      table: playlists
+      type: left
+contents:
+  advertisers.name:
+    join:
+      'on': contents.advertiser_id = advertisers.id
+      table: advertisers
+      type: left
+  advertisers.postal_code:
+    join:
+      'on': contents.advertiser_id = advertisers.id
+      table: advertisers
+      type: left
+  contents.file_name:
+    join:
+      'on': contents.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': contents.content_id = contents.content_id
+      table: contents
+      type: left
+  dealers.business_name:
+    join:
+      'on': contents.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  feeds.feed_title:
+    join:
+      'on': contents.feed_id = feeds.id
+      table: feeds
+      type: left
+  hosts.name:
+    join:
+      'on': contents.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': contents.host_id = hosts.host_id
+      table: hosts
+      type: left
+dealer_activity_logs:
+  activity_logs.activity_code:
+    join:
+      'on': dealer_activity_logs.activity_log_id = activity_logs.activity_log_id
+      table: activity_logs
+      type: left
+dealer_address_books:
+  dealers.business_name:
+    join:
+      'on': dealer_address_books.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+dealer_admins:
+  dealers.business_name:
+    join:
+      'on': dealer_admins.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  users.first_name:
+    join:
+      'on': dealer_admins.user_id = users.user_id
+      table: users
+      type: left
+  users.last_name:
+    join:
+      'on': dealer_admins.user_id = users.user_id
+      table: users
+      type: left
+  users.middle_name:
+    join:
+      'on': dealer_admins.user_id = users.user_id
+      table: users
+      type: left
+dealer_contract_details:
+  dealers.business_name:
+    join:
+      'on': dealer_contract_details.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+dealer_templates:
+  dealers.business_name:
+    join:
+      'on': dealer_templates.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  templates.name:
+    join:
+      'on': dealer_templates.template_id = templates.template_id
+      table: templates
+      type: left
+dealer_unused_contents:
+  contents.file_name:
+    join:
+      'on': dealer_unused_contents.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': dealer_unused_contents.content_id = contents.content_id
+      table: contents
+      type: left
+  dealers.business_name:
+    join:
+      'on': dealer_unused_contents.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+dealer_values:
+  dealers.business_name:
+    join:
+      'on': dealer_values.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+dealers:
+  dealers.business_name:
+    join:
+      'on': dealers.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  users.first_name:
+    join:
+      'on': dealers.user_id = users.user_id
+      table: users
+      type: left
+  users.last_name:
+    join:
+      'on': dealers.user_id = users.user_id
+      table: users
+      type: left
+  users.middle_name:
+    join:
+      'on': dealers.user_id = users.user_id
+      table: users
+      type: left
+dealers_contract_files:
+  dealers.business_name:
+    join:
+      'on': dealers_contract_files.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+dealers_new:
+  dealers.business_name:
+    join:
+      'on': dealers_new.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  users.first_name:
+    join:
+      'on': dealers_new.user_id = users.user_id
+      table: users
+      type: left
+  users.last_name:
+    join:
+      'on': dealers_new.user_id = users.user_id
+      table: users
+      type: left
+  users.middle_name:
+    join:
+      'on': dealers_new.user_id = users.user_id
+      table: users
+      type: left
+dealers_territory_files:
+  dealers.business_name:
+    join:
+      'on': dealers_territory_files.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+feed_fillers:
+  feed_fillers.folder_name:
+    join:
+      'on': feed_fillers.feed_filler_id = feed_fillers.feed_filler_id
+      table: feed_fillers
+      type: left
+  feeds.feed_title:
+    join:
+      'on': feed_fillers.feed_id = feeds.id
+      table: feeds
+      type: left
+feed_global_settings:
+  feeds.feed_title:
+    join:
+      'on': feed_global_settings.feed_id = feeds.id
+      table: feeds
+      type: left
+feed_news:
+  feeds.feed_title:
+    join:
+      'on': feed_news.feed_id = feeds.id
+      table: feeds
+      type: left
+feed_slides:
+  contents.file_name:
+    join:
+      'on': feed_slides.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': feed_slides.content_id = contents.content_id
+      table: contents
+      type: left
+  feeds.feed_title:
+    join:
+      'on': feed_slides.feed_id = feeds.id
+      table: feeds
+      type: left
+feed_types:
+  feed_types.name:
+    join:
+      'on': feed_types.feed_type_id = feed_types.feed_type_id
+      table: feed_types
+      type: left
+feed_weathers:
+  feed_weathers.zip_code:
+    join:
+      'on': feed_weathers.feed_weather_id = feed_weathers.feed_weather_id
+      table: feed_weathers
+      type: left
+  feeds.feed_title:
+    join:
+      'on': feed_weathers.feed_id = feeds.id
+      table: feeds
+      type: left
+feeds:
+  dealers.business_name:
+    join:
+      'on': feeds.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  feed_types.name:
+    join:
+      'on': feeds.feed_type_id = feed_types.feed_type_id
+      table: feed_types
+      type: left
+  feeds.feed_title:
+    join:
+      'on': feeds.feed_id = feeds.id
+      table: feeds
+      type: left
+field_group_fields:
+  field_groups.field_group_name:
+    join:
+      'on': field_group_fields.field_group_id = field_groups.field_group_id
+      table: field_groups
+      type: left
+field_group_values:
+  hosts.name:
+    join:
+      'on': field_group_values.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': field_group_values.host_id = hosts.host_id
+      table: hosts
+      type: left
+field_groups:
+  field_groups.field_group_name:
+    join:
+      'on': field_groups.field_group_id = field_groups.field_group_id
+      table: field_groups
+      type: left
+filler_contents:
+  filler_contents.title:
+    join:
+      'on': filler_contents.filler_content_id = filler_contents.filler_content_id
+      table: filler_contents
+      type: left
+  filler_groups.name:
+    join:
+      'on': filler_contents.filler_group_id = filler_groups.filler_group_id
+      table: filler_groups
+      type: left
+filler_contents_schedule:
+  filler_contents.title:
+    join:
+      'on': filler_contents_schedule.filler_content_id = filler_contents.filler_content_id
+      table: filler_contents
+      type: left
+  filler_groups.name:
+    join:
+      'on': filler_contents_schedule.filler_group_id = filler_groups.filler_group_id
+      table: filler_groups
+      type: left
+filler_group_blacklisted:
+  filler_groups.name:
+    join:
+      'on': filler_group_blacklisted.filler_group_id = filler_groups.filler_group_id
+      table: filler_groups
+      type: left
+filler_group_schedules:
+  filler_contents.title:
+    join:
+      'on': filler_group_schedules.filler_content_id = filler_contents.filler_content_id
+      table: filler_contents
+      type: left
+  filler_groups.name:
+    join:
+      'on': filler_group_schedules.filler_group_id = filler_groups.filler_group_id
+      table: filler_groups
+      type: left
+filler_groups:
+  dealers.business_name:
+    join:
+      'on': filler_groups.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  filler_groups.name:
+    join:
+      'on': filler_groups.filler_group_id = filler_groups.filler_group_id
+      table: filler_groups
+      type: left
+filler_logs:
+  filler_playlists.name:
+    join:
+      'on': filler_logs.filler_playlist_id = filler_playlists.filler_playlist_id
+      table: filler_playlists
+      type: left
+filler_playlist_contents:
+  contents.file_name:
+    join:
+      'on': filler_playlist_contents.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': filler_playlist_contents.content_id = contents.content_id
+      table: contents
+      type: left
+  filler_playlists.name:
+    join:
+      'on': filler_playlist_contents.filler_playlist_id = filler_playlists.filler_playlist_id
+      table: filler_playlists
+      type: left
+filler_playlist_dealers:
+  dealers.business_name:
+    join:
+      'on': filler_playlist_dealers.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  filler_playlists.name:
+    join:
+      'on': filler_playlist_dealers.filler_playlist_id = filler_playlists.filler_playlist_id
+      table: filler_playlists
+      type: left
+filler_playlist_groups:
+  filler_groups.name:
+    join:
+      'on': filler_playlist_groups.filler_group_id = filler_groups.filler_group_id
+      table: filler_groups
+      type: left
+  filler_playlists.name:
+    join:
+      'on': filler_playlist_groups.filler_playlist_id = filler_playlists.filler_playlist_id
+      table: filler_playlists
+      type: left
+filler_playlists:
+  dealers.business_name:
+    join:
+      'on': filler_playlists.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  filler_playlists.name:
+    join:
+      'on': filler_playlists.filler_playlist_id = filler_playlists.filler_playlist_id
+      table: filler_playlists
+      type: left
+filler_playlists_20240305:
+  dealers.business_name:
+    join:
+      'on': filler_playlists_20240305.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  filler_playlists.name:
+    join:
+      'on': filler_playlists_20240305.filler_playlist_id = filler_playlists.filler_playlist_id
+      table: filler_playlists
+      type: left
+host_activity_logs:
+  activity_logs.activity_code:
+    join:
+      'on': host_activity_logs.activity_log_id = activity_logs.activity_log_id
+      table: activity_logs
+      type: left
+host_field_groups:
+  field_groups.field_group_name:
+    join:
+      'on': host_field_groups.field_group_id = field_groups.field_group_id
+      table: field_groups
+      type: left
+  hosts.name:
+    join:
+      'on': host_field_groups.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': host_field_groups.host_id = hosts.host_id
+      table: hosts
+      type: left
+host_files:
+  hosts.name:
+    join:
+      'on': host_files.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': host_files.host_id = hosts.host_id
+      table: hosts
+      type: left
+host_programmatic:
+  hosts.name:
+    join:
+      'on': host_programmatic.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': host_programmatic.host_id = hosts.host_id
+      table: hosts
+      type: left
+host_support_tickets:
+  hosts.name:
+    join:
+      'on': host_support_tickets.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': host_support_tickets.host_id = hosts.host_id
+      table: hosts
+      type: left
+hosts:
+  dealers.business_name:
+    join:
+      'on': hosts.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  hosts.name:
+    join:
+      'on': hosts.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': hosts.host_id = hosts.host_id
+      table: hosts
+      type: left
+  users.first_name:
+    join:
+      'on': hosts.user_id = users.user_id
+      table: users
+      type: left
+  users.last_name:
+    join:
+      'on': hosts.user_id = users.user_id
+      table: users
+      type: left
+  users.middle_name:
+    join:
+      'on': hosts.user_id = users.user_id
+      table: users
+      type: left
+hosts_import:
+  hosts.name:
+    join:
+      'on': hosts_import.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': hosts_import.host_id = hosts.host_id
+      table: hosts
+      type: left
+installation_checklist_items:
+  installation_checklist_items.title:
+    join:
+      'on': installation_checklist_items.installation_checklist_item_id = installation_checklist_items.installation_checklist_item_id
+      table: installation_checklist_items
+      type: left
+  installation_checklists.title:
+    join:
+      'on': installation_checklist_items.installation_checklist_id = installation_checklists.id
+      table: installation_checklists
+      type: left
+installation_checklists:
+  installation_checklists.title:
+    join:
+      'on': installation_checklists.installation_checklist_id = installation_checklists.id
+      table: installation_checklists
+      type: left
+license_favorites:
+  users.first_name:
+    join:
+      'on': license_favorites.user_id = users.user_id
+      table: users
+      type: left
+  users.last_name:
+    join:
+      'on': license_favorites.user_id = users.user_id
+      table: users
+      type: left
+  users.middle_name:
+    join:
+      'on': license_favorites.user_id = users.user_id
+      table: users
+      type: left
+license_installation_checklists:
+  installation_checklist_items.title:
+    join:
+      'on': license_installation_checklists.installation_checklist_item_id = installation_checklist_items.installation_checklist_item_id
+      table: installation_checklist_items
+      type: left
+license_screens:
+  screens.screen_name:
+    join:
+      'on': license_screens.screen_id = screens.screen_id
+      table: screens
+      type: left
+licenses:
+  dealers.business_name:
+    join:
+      'on': licenses.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  hosts.name:
+    join:
+      'on': licenses.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': licenses.host_id = hosts.host_id
+      table: hosts
+      type: left
+licenses_acquired:
+  dealers.business_name:
+    join:
+      'on': licenses_acquired.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+permissions:
+  permissions.name:
+    join:
+      'on': permissions.permission_id = permissions.permission_id
+      table: permissions
+      type: left
+placer_dumps:
+  placers.name:
+    join:
+      'on': placer_dumps.placer_id = placers.placer_id
+      table: placers
+      type: left
+placers:
+  hosts.name:
+    join:
+      'on': placers.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': placers.host_id = hosts.host_id
+      table: hosts
+      type: left
+  placers.name:
+    join:
+      'on': placers.placer_id = placers.placer_id
+      table: placers
+      type: left
+playlist_contents:
+  contents.file_name:
+    join:
+      'on': playlist_contents.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': playlist_contents.content_id = contents.content_id
+      table: contents
+      type: left
+  playlists.name:
+    join:
+      'on': playlist_contents.playlist_id = playlists.playlist_id
+      table: playlists
+      type: left
+playlists:
+  dealers.business_name:
+    join:
+      'on': playlists.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  playlists.name:
+    join:
+      'on': playlists.playlist_id = playlists.playlist_id
+      table: playlists
+      type: left
+purchase_items:
+  dealers.business_name:
+    join:
+      'on': purchase_items.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+release_notes:
+  release_notes.title:
+    join:
+      'on': release_notes.release_note_id = release_notes.release_note_id
+      table: release_notes
+      type: left
+roles:
+  roles.role_name:
+    join:
+      'on': roles.role_id = roles.role_id
+      table: roles
+      type: left
+screen_template_zone_playlists:
+  playlists.name:
+    join:
+      'on': screen_template_zone_playlists.playlist_id = playlists.playlist_id
+      table: playlists
+      type: left
+  screens.screen_name:
+    join:
+      'on': screen_template_zone_playlists.screen_id = screens.screen_id
+      table: screens
+      type: left
+  template_zones.name:
+    join:
+      'on': screen_template_zone_playlists.template_zone_id = template_zones.template_zone_id
+      table: template_zones
+      type: left
+  templates.name:
+    join:
+      'on': screen_template_zone_playlists.template_id = templates.template_id
+      table: templates
+      type: left
+screen_types:
+  screen_types.name:
+    join:
+      'on': screen_types.screen_type_id = screen_types.screen_type_id
+      table: screen_types
+      type: left
+screens:
+  dealers.business_name:
+    join:
+      'on': screens.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  hosts.name:
+    join:
+      'on': screens.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': screens.host_id = hosts.host_id
+      table: hosts
+      type: left
+  screen_types.name:
+    join:
+      'on': screens.screen_type_id = screen_types.screen_type_id
+      table: screen_types
+      type: left
+  screens.screen_name:
+    join:
+      'on': screens.screen_id = screens.screen_id
+      table: screens
+      type: left
+  templates.name:
+    join:
+      'on': screens.template_id = templates.template_id
+      table: templates
+      type: left
+stripe_users:
+  dealers.business_name:
+    join:
+      'on': stripe_users.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+tag_details:
+  tag_types.name:
+    join:
+      'on': tag_details.tag_type_id = tag_types.tag_type_id
+      table: tag_types
+      type: left
+  tags.name:
+    join:
+      'on': tag_details.tag_id = tags.tag_id
+      table: tags
+      type: left
+tag_types:
+  tag_types.name:
+    join:
+      'on': tag_types.tag_type_id = tag_types.tag_type_id
+      table: tag_types
+      type: left
+tags:
+  dealers.business_name:
+    join:
+      'on': tags.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  tags.name:
+    join:
+      'on': tags.tag_id = tags.tag_id
+      table: tags
+      type: left
+template_zones:
+  template_zones.name:
+    join:
+      'on': template_zones.template_zone_id = template_zones.template_zone_id
+      table: template_zones
+      type: left
+  templates.name:
+    join:
+      'on': template_zones.template_id = templates.template_id
+      table: templates
+      type: left
+templates:
+  templates.name:
+    join:
+      'on': templates.template_id = templates.template_id
+      table: templates
+      type: left
+user_activity_logs:
+  activity_logs.activity_code:
+    join:
+      'on': user_activity_logs.activity_log_id = activity_logs.activity_log_id
+      table: activity_logs
+      type: left
+user_roles:
+  roles.role_name:
+    join:
+      'on': user_roles.role_id = roles.role_id
+      table: roles
+      type: left
+  users.first_name:
+    join:
+      'on': user_roles.user_id = users.user_id
+      table: users
+      type: left
+  users.last_name:
+    join:
+      'on': user_roles.user_id = users.user_id
+      table: users
+      type: left
+  users.middle_name:
+    join:
+      'on': user_roles.user_id = users.user_id
+      table: users
+      type: left
+users:
+  users.first_name:
+    join:
+      'on': users.user_id = users.user_id
+      table: users
+      type: left
+  users.last_name:
+    join:
+      'on': users.user_id = users.user_id
+      table: users
+      type: left
+  users.middle_name:
+    join:
+      'on': users.user_id = users.user_id
+      table: users
+      type: left
+webhooks:
+  hosts.name:
+    join:
+      'on': webhooks.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': webhooks.host_id = hosts.host_id
+      table: hosts
+      type: left
+xml_settings:
+  advertisers.name:
+    join:
+      'on': xml_settings.advertiser_id = advertisers.id
+      table: advertisers
+      type: left
+  advertisers.postal_code:
+    join:
+      'on': xml_settings.advertiser_id = advertisers.id
+      table: advertisers
+      type: left
+  contents.file_name:
+    join:
+      'on': xml_settings.content_id = contents.content_id
+      table: contents
+      type: left
+  contents.title:
+    join:
+      'on': xml_settings.content_id = contents.content_id
+      table: contents
+      type: left
+  dealers.business_name:
+    join:
+      'on': xml_settings.dealer_id = dealers.dealer_id
+      table: dealers
+      type: left
+  feed_types.name:
+    join:
+      'on': xml_settings.feed_type_id = feed_types.feed_type_id
+      table: feed_types
+      type: left
+  feeds.feed_title:
+    join:
+      'on': xml_settings.feed_id = feeds.id
+      table: feeds
+      type: left
+  field_groups.field_group_name:
+    join:
+      'on': xml_settings.field_group_id = field_groups.field_group_id
+      table: field_groups
+      type: left
+  filler_groups.name:
+    join:
+      'on': xml_settings.filler_group_id = filler_groups.filler_group_id
+      table: filler_groups
+      type: left
+  filler_playlists.name:
+    join:
+      'on': xml_settings.filler_playlist_id = filler_playlists.filler_playlist_id
+      table: filler_playlists
+      type: left
+  hosts.name:
+    join:
+      'on': xml_settings.host_id = hosts.host_id
+      table: hosts
+      type: left
+  hosts.postal_code:
+    join:
+      'on': xml_settings.host_id = hosts.host_id
+      table: hosts
+      type: left
+  installation_checklist_items.title:
+    join:
+      'on': xml_settings.installation_checklist_item_id = installation_checklist_items.installation_checklist_item_id
+      table: installation_checklist_items
+      type: left
+  installation_checklists.title:
+    join:
+      'on': xml_settings.installation_checklist_id = installation_checklists.id
+      table: installation_checklists
+      type: left
+  placers.name:
+    join:
+      'on': xml_settings.placer_id = placers.placer_id
+      table: placers
+      type: left
+  playlists.name:
+    join:
+      'on': xml_settings.playlist_id = playlists.playlist_id
+      table: playlists
+      type: left
+  screen_types.name:
+    join:
+      'on': xml_settings.screen_type_id = screen_types.screen_type_id
+      table: screen_types
+      type: left
+  screens.screen_name:
+    join:
+      'on': xml_settings.screen_id = screens.screen_id
+      table: screens
+      type: left
+  tag_types.name:
+    join:
+      'on': xml_settings.tag_type_id = tag_types.tag_type_id
+      table: tag_types
+      type: left
+  tags.name:
+    join:
+      'on': xml_settings.tag_id = tags.tag_id
+      table: tags
+      type: left
+  template_zones.name:
+    join:
+      'on': xml_settings.template_zone_id = template_zones.template_zone_id
+      table: template_zones
+      type: left
+  templates.name:
+    join:
+      'on': xml_settings.template_id = templates.template_id
+      table: templates
+      type: left
+  users.first_name:
+    join:
+      'on': xml_settings.user_id = users.user_id
+      table: users
+      type: left
+  users.last_name:
+    join:
+      'on': xml_settings.user_id = users.user_id
+      table: users
+      type: left
+  users.middle_name:
+    join:
+      'on': xml_settings.user_id = users.user_id
+      table: users
+      type: left

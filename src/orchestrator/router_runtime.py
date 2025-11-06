@@ -18,6 +18,8 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, date
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
+import spacy
+from spacy.matcher import Matcher
 
 from .config_loader import load_all_configs
 from .models import (
@@ -28,6 +30,72 @@ from .models import (
     Direction,
     Resolution,
 )
+
+# --------------------------- Alias Map --------------------------- #
+
+# Natural -> column aliases (base-table scoped unless qualified)
+ORDER_ALIASES = {
+    "name": "name",
+    "dealer name": "dealers.business_name",  # cross-table (uses your LEFT JOIN path when projected)
+    "date created": "date_created",
+    "created date": "date_created",
+    "city": "city",
+    "state": "state",
+    "region": "region",
+}
+
+# --------------------------- spaCy model --------------------------- #
+
+# Load spaCy model (for entity recognition)
+nlp = spacy.load("en_core_web_sm")
+
+# Define the possible intents
+INTENTS = {
+    "list": ["list", "show", "display", "give me"],
+    "top": ["top", "best", "highest", "most"],
+    "aggregate": ["sum", "count", "average", "total"],
+}
+
+# Add entity patterns for tables and columns (extend this as needed)
+ENTITY_PATTERNS = [
+    {"label": "TABLE", "pattern": [{"lower": "advertisers"}]},
+    {"label": "TABLE", "pattern": [{"lower": "activities"}]},
+    {"label": "COLUMN", "pattern": [{"lower": "name"}]},
+    {"label": "COLUMN", "pattern": [{"lower": "status"}]},
+    {"label": "COLUMN", "pattern": [{"lower": "region"}]},
+    {"label": "COLUMN", "pattern": [{"lower": "state"}]},
+]
+
+def _classify_intent(nl: str) -> str:
+    """Classify the intent of the query using a basic keyword match."""
+    for intent, keywords in INTENTS.items():
+        for keyword in keywords:
+            if keyword in nl.lower():
+                return intent
+    return "unknown"  # default intent
+
+def _extract_entities(nl: str) -> dict:
+    """Extract tables and columns from the query using spaCy's matcher."""
+    doc = nlp(nl)
+    matcher = Matcher(nlp.vocab)
+    
+    # Add patterns for tables and columns
+    for pattern in ENTITY_PATTERNS:
+        matcher.add(pattern["label"], [pattern["pattern"]])
+    
+    matches = matcher(doc)
+    
+    # Extract matched tables and columns
+    entities = {"tables": [], "columns": []}
+    for match_id, start, end in matches:
+        match_id_str = nlp.vocab.strings[match_id]
+        span = doc[start:end]
+        if match_id_str == "TABLE":
+            entities["tables"].append(span.text)
+        elif match_id_str == "COLUMN":
+            entities["columns"].append(span.text)
+    
+    return entities
 
 # --------------------------- Errors --------------------------- #
 
@@ -56,6 +124,8 @@ def _tokenize_lower(s: str) -> List[str]:
 
 # --------------------------- Geo disambiguation helpers --------------------------- #
 
+US_ONLY_GEO = True  # set False to allow any city string (e.g., Cebu)
+
 _US_STATE_NAMES = {
     "alabama","alaska","arizona","arkansas","california","colorado","connecticut","delaware",
     "florida","georgia","hawaii","idaho","illinois","indiana","iowa","kansas","kentucky",
@@ -76,17 +146,18 @@ def _place_looks_like_state(value: str) -> bool:
     v = value.strip().lower()
     if v in _US_STATE_NAMES or v in _US_STATE_ABBR:
         return True
-    # two-letter uppercase like "TX", "CA"
     if len(value.strip()) == 2 and value.isupper():
         return True
     return False
 
 def _choose_geo_column(base_table: str, value: str, s: Surfaces) -> Optional[str]:
     cols = set(s.fields_by_table.get(base_table) or [])
-    # If it looks like a US state, prefer state
-    if _place_looks_like_state(value) and "state" in cols:
-        return "state"
-    # Otherwise prefer city if present; else state; else region
+    if _place_looks_like_state(value):
+        return "state" if "state" in cols else None
+    if US_ONLY_GEO:
+        # In US-only mode, we do not assume arbitrary strings are cities/regions
+        return "city" if "city" in cols and False else None  # keep strict; can relax later
+    # non-strict mode: prefer city → state → region
     if "city" in cols:
         return "city"
     if "state" in cols:
@@ -94,7 +165,6 @@ def _choose_geo_column(base_table: str, value: str, s: Surfaces) -> Optional[str
     if "region" in cols:
         return "region"
     return None
-
 
 # --------------------------- Surfaces --------------------------- #
 
@@ -291,10 +361,9 @@ def detect_date_phrase(nl: str) -> Optional[DateFilter]:
 @dataclass
 class ParsedIntent:
     base_table: Optional[str]
-    dim_names: List[str]           # e.g., "table.col" or bare names
-    met_names: List[str]           # metric keys or hints ("count", "sum:col")
-    order_field: Optional[str]
-    order_dir: Optional[Direction]
+    dim_names: List[str]                 # e.g., "table.col" or bare names
+    met_names: List[str]                 # metric keys or hints ("count", "sum:col")
+    order_items: List[Tuple[str, Optional[Direction]]]  # NEW: list of (field, dir)
     limit: Optional[int]
     date_filter: Optional[DateFilter]
     is_detail_hint: bool = False
@@ -302,24 +371,24 @@ class ParsedIntent:
 def parse_intent(nl: str) -> ParsedIntent:
     s = nl.lower()
     limit = None
-    order_dir: Optional[Direction] = None
 
     if m := re.search(r"\blimit\s+(\d{1,5})\b", s):
         limit = int(m.group(1))
     if m := re.search(r"\btop\s+(\d{1,5})\b", s):
-        limit = int(m.group(1)); order_dir = Direction.DESC
+        limit = int(m.group(1))
     if m := re.search(r"\bbottom\s+(\d{1,5})\b", s):
-        limit = int(m.group(1)); order_dir = Direction.ASC
+        limit = int(m.group(1))
     if m := re.search(r"\b(latest|recent|newest)\s+(\d{1,5})\b", s):
         limit = int(m.group(2))
 
-    order_field, findir = _parse_order_clause(s)
-    order_dir = findir or order_dir
-
+    order_items = _parse_order_clause(s)
     df = detect_date_phrase(s)
 
+    # --- remove "order by ..." before scanning for grouping hints ---
+    s_no_order = re.sub(r"order\s+by\s+.+?(?=$|\s+limit\s+\d+)", "", s)
+
     dim_names: List[str] = []
-    for m in re.finditer(r"\b(?:by|group\s+by)\s+([a-z0-9_\.]+(?:\s+and\s+[a-z0-9_\.]+)*)", s):
+    for m in re.finditer(r"\b(?:group\s+by|by)\s+([a-z0-9_\.]+(?:\s+and\s+[a-z0-9_\.]+)*)", s_no_order):
         clause = m.group(1)
         for part in re.split(r"\s+and\s+|,\s*", clause):
             name = part.strip().replace(" ", "_")
@@ -340,13 +409,11 @@ def parse_intent(nl: str) -> ParsedIntent:
         base_table=None,
         dim_names=dim_names,
         met_names=met_names,
-        order_field=order_field,
-        order_dir=order_dir,
+        order_items=order_items,
         limit=limit,
         date_filter=df,
         is_detail_hint=is_detail_hint,
     )
-
 
 # --------------------------- Resolution helpers --------------------------- #
 
@@ -360,6 +427,67 @@ _SYN_TABLE: Dict[str, str] = {
     "city": "cities", "cities": "cities",
 }
 
+def _extract_group_by(nl: str, base_table: str, surfaces) -> list[str]:
+    """
+    Parse 'by <tokens>' or 'group by <tokens>' into qualified dimension fields for base_table.
+    Tokens can be comma/and separated, e.g. 'by region, city' or 'group by state and city'.
+    Only returns fields that exist for the base_table in the semantic layer.
+    """
+    nl_l = nl.lower()
+
+    # capture tokens after "by ..." or "group by ..."
+    m = re.search(r"\bgroup\s+by\s+([a-z0-9_.,\s-]+)", nl_l)
+    if not m:
+        m = re.search(r"\bby\s+([a-z0-9_.,\s-]+)", nl_l)
+
+    if not m:
+        return []
+
+    raw = m.group(1)
+    # split on commas and "and"
+    parts = re.split(r"\s*,\s*|\s+and\s+", raw)
+    parts = [p.strip() for p in parts if p.strip()]
+    if not parts:
+        return []
+
+    # candidates from surfaces: prefer dimensions (semantic) if available; fallback to physical fields
+    dims_for_table = set(surfaces.dims_by_table.get(base_table, []))
+    fields_for_table = set(f"{base_table}.{c}" for c in (surfaces.fields_by_table.get(base_table) or []))
+
+    resolved: list[str] = []
+    for token in parts:
+        # normalize known aliases
+        alias = token
+        alias = alias.replace("date created", "date_created").replace("created date", "date_created")
+        alias = alias.replace("postal code", "postal_code").replace("zip", "postal_code")
+
+        # try fully-qualified first
+        fq = f"{base_table}.{alias}"
+        if fq in dims_for_table:
+            resolved.append(fq)
+            continue
+        if fq in fields_for_table:
+            resolved.append(fq)
+            continue
+
+        # try a few common short names mapping
+        for candidate in (alias, alias.replace(" ", "_")):
+            fq2 = f"{base_table}.{candidate}"
+            if fq2 in dims_for_table or fq2 in fields_for_table:
+                resolved.append(fq2)
+                break
+
+    # de-dup while preserving order
+    seen = set()
+    uniq = []
+    for d in resolved:
+        if d not in seen:
+            uniq.append(d); seen.add(d)
+    return uniq
+
+def _escape_like(val: str) -> str:
+    # Escape \, %, _ to avoid pattern injection; ESCAPE '\\' is added during SQL compile.
+    return val.replace("\\", "\\\\").replace("%", "\\%").replace("_", "\\_")
 
 def _detect_base_table_from_text(nl: str, surfaces: Surfaces) -> Optional[str]:
     tokens = _tokenize_lower(nl)
@@ -481,18 +609,22 @@ def _apply_date_filter(base_table: str, df: DateFilter, surfaces: Surfaces, filt
         return
     filters.append(Filter(field=dim_key, op=Operator.BETWEEN, value=[df.start.isoformat(), df.end.isoformat()]))
 
-
-def _parse_order_clause(s: str) -> Tuple[Optional[str], Optional[Direction]]:
-    # Capture 'order by <field>' optionally followed by asc/desc; stop at end or 'limit N'
-    m = re.search(r"order\s+by\s+([a-z0-9_\. ]+?)(?:\s+(asc|desc))?(?=$|\s+limit\s+\d+)", s)
+def _parse_order_clause(s: str) -> List[Tuple[str, Optional[Direction]]]:
+    # capture "order by ..." until end or before "limit N"
+    m = re.search(r"order\s+by\s+(.+?)(?=$|\s+limit\s+\d+)", s)
     if not m:
-        # Fallback (no limit present)
-        m = re.search(r"order\s+by\s+([a-z0-9_\. ]+)(?:\s+(asc|desc))?(?:$|\b)", s)
-    if not m:
-        return None, None
-    field = m.group(1).strip()
-    dir_ = Direction(m.group(2)) if m.group(2) else None
-    return field, dir_
+        return []
+    body = m.group(1)
+    parts = [p.strip() for p in body.split(",") if p.strip()]
+    out: List[Tuple[str, Optional[Direction]]] = []
+    for p in parts:
+        m2 = re.match(r"([a-z0-9_\. ]+?)(?:\s+(asc|desc))?$", p)
+        if not m2:
+            continue
+        field = m2.group(1).strip()
+        dir_ = Direction(m2.group(2)) if m2.group(2) else None
+        out.append((field, dir_))
+    return out
 
 _NAMEISH = re.compile(r"(^name$|_name$|^name_|\bname\b)")
 
@@ -580,49 +712,36 @@ def _trim_value_span(txt: str) -> str:
 
 def _extract_value_filters(nl: str, base_table: str, s: Surfaces) -> List[Filter]:
     """
-    Heuristics:
-    - Implicit status keywords: active/inactive/enabled/disabled/pending/... → status = <kw>
-    - Explicit pairs: (status|region|state|city|name) <value>
-    - "in <place>" (but NOT "in the last ..."):
-        prefer state → city → region (first available column on base_table)
-    - Uses exact-string equality (safe). LIKE / IN / negations are Phase-2.
-
-    NOTE: We only add filters for columns that exist on `base_table`.
+    Adds filters from natural phrases:
+        - Implicit status: active/inactive/enabled/disabled/pending/approved/denied/suspended
+        - Explicit attr pairs: (status|region|state|city|name) <value>
+        - Text ops: "<attr> contains X" / "starts with X" / "ends with X"
+        - Negation: "status not inactive", "status != inactive"
+        - Numeric: "<attr> >= 5", "<attr> < 1000"
+        - Geo: "in <place>" (US-only strict by default) and lists: "in A, B, C"
     """
     filters: List[Filter] = []
-    used: set[tuple[str, str]] = set()  # (col,value) to avoid dupes
-
+    used: set[tuple[str, str, str]] = set()
+    
     text = nl
+    # Remove trailing ORDER BY … (so we don't capture 'asc'/'desc' as values)
+    text_no_order = re.sub(r"order\s+by\s+.+?(?=$)", "", text, flags=re.IGNORECASE)
 
     def has_col(col: str) -> bool:
         return col in (s.fields_by_table.get(base_table) or [])
 
-    # ---------- 0) Implicit status keywords (no need to say "status active") ----------
-    status_kw_map = {
-        "active": "active",
-        "inactive": "inactive",
-        "enabled": "enabled",
-        "disabled": "disabled",
-        "pending": "pending",
-        "approved": "approved",
-        "denied": "denied",
-        "suspended": "suspended",
-    }
-    if has_col("status"):
-        for kw, val in status_kw_map.items():
-            if re.search(rf"\b{kw}\b", text, flags=re.IGNORECASE):
-                key = ("status", val)
-                if key not in used:
-                    filters.append(Filter(field=f"{base_table}.status", op=Operator.EQ, value=val))
-                    used.add(key)
-                break  # take the first matched status keyword only
+    def add(op: Operator, col: str, val: Any):
+        key = (op.value, col, str(val))
+        if key not in used:
+            used.add(key)
+            filters.append(Filter(field=f"{base_table}.{col}", op=op, value=val))
 
-    # ---------- 1) Explicit attribute/value pairs ----------
+    # --- helper to trim trailing control phrases from captured values ---
     def _trim_value_span(txt: str) -> str:
         guards = [
             r"\border\s+by\b", r"\bgroup\s+by\b", r"\blimit\s+\d+\b",
             r"\bin\s+the\s+last\b", r"\blast\s+\d+\b", r"\bthis\s+\w+\b",
-            r"\bby\b", r",", r"\band\b",
+            r"\bby\b", r", and\b", r"\band\b",
         ]
         cut = len(txt)
         for g in guards:
@@ -631,41 +750,108 @@ def _extract_value_filters(nl: str, base_table: str, s: Surfaces) -> List[Filter
                 cut = min(cut, m.start())
         return txt[:cut].strip()
 
-    attr_tokens = ["status", "region", "state", "city", "name"]
+    # --- 0) implicit status keywords ---
+    status_kw_map = {
+        "active":"active","inactive":"inactive","enabled":"enabled","disabled":"disabled",
+        "pending":"pending","approved":"approved","denied":"denied","suspended":"suspended",
+    }
+    if has_col("status"):
+        for kw, val in status_kw_map.items():
+            # If negated (not/!=/is not), don't add the implicit positive status
+            if re.search(rf"\b(not|is\s+not)\s+{kw}\b", text, flags=re.IGNORECASE) or \
+            re.search(rf"!=\s*{kw}\b", text, flags=re.IGNORECASE):
+                continue
+            if re.search(rf"\b{kw}\b", text, flags=re.IGNORECASE):
+                add(Operator.EQ, "status", val)
+                break
+
+    # --- 1) text ops: contains/starts/ends (parse FIRST to avoid equals catching them) ---
+    for tok, pat, fmt in [
+        ("name",   r"\bname\b\s*contains\s+(.+)",         "%{}%"),
+        ("name",   r"\bname\b\s*starts\s+with\s+(.+)",    "{}%"),
+        ("name",   r"\bname\b\s*ends\s+with\s+(.+)",      "%{}"),
+        ("city",   r"\bcity\b\s*contains\s+(.+)",         "%{}%"),
+        ("region", r"\bregion\b\s*contains\s+(.+)",       "%{}%"),
+        ("state",  r"\bstate\b\s*contains\s+(.+)",        "%{}%"),
+    ]:
+        m = re.search(pat, text, flags=re.IGNORECASE)
+        if m:
+            raw = _trim_value_span(m.group(1))
+            col = _natural_to_column(base_table, tok, s)
+            if raw and col and has_col(col):
+                patt = fmt.format(_escape_like(raw))
+                add(Operator.LIKE, col, patt)
+
+    # --- 2) explicit attr pairs (equals) and negation, guarded from text-ops ---
+    attr_tokens = ["status","region","state","city","name"]
     for tok in attr_tokens:
+        # equals-style; DO NOT match when followed by contains/starts/ends
         m = re.search(
-            rf"\b{tok}\b\s*(?:=|is|equals)?\s*([A-Za-z][A-Za-z0-9 _\-]{{1,80}})",
-            text,
+            rf"\b{tok}\b\s*(?:(?:=|is|equals)\s*)?(?!not\b|contains\b|starts\s+with\b|ends\s+with\b)([A-Za-z][A-Za-z0-9 _\-]{{1,80}})",
+            text_no_order,
             flags=re.IGNORECASE,
         )
-        if not m:
-            continue
-        raw = _trim_value_span(m.group(1))
-        if not raw:
-            continue
+        if m:
+            raw = _trim_value_span(m.group(1))
+            col = _natural_to_column(base_table, tok, s)
+            if raw and col and has_col(col):
+                add(Operator.EQ, col, raw)
 
-        col = _natural_to_column(base_table, tok, s)
-        if not col or not has_col(col):
-            continue
+        # negation-style
+        m2 = re.search(
+            rf"\b{tok}\b\s*(?:!=|is\s+not|not)\s*([A-Za-z][A-Za-z0-9 _\-]{{1,80}})",
+            text_no_order,
+            flags=re.IGNORECASE,
+        )
+        if m2:
+            raw = _trim_value_span(m2.group(1))
+            col = _natural_to_column(base_table, tok, s)
+            if raw and col and has_col(col):
+                add(Operator.NE, col, raw)
 
-        key = (col, raw)
-        if key in used:
-            continue
-        used.add(key)
-        filters.append(Filter(field=f"{base_table}.{col}", op=Operator.EQ, value=raw))
+    # --- 3) numeric comparisons: "<attr> >= 5" ---
+    for m in re.finditer(r"\b([a-z][a-z0-9_ ]{0,40})\s*(=|!=|>=|<=|>|<)\s*(\d+(?:\.\d+)?)\b", text, flags=re.IGNORECASE):
+        left, op, num = m.group(1).strip(), m.group(2), m.group(3)
+        col = _natural_to_column(base_table, left, s) or left.replace(" ", "_")
+        if col and has_col(col):
+            op_map = {"=":Operator.EQ,"!=":Operator.NE,">=":Operator.GTE,"<=":Operator.LTE,">":Operator.GT,"<":Operator.LT}
+            add(op_map[op], col, float(num) if "." in num else int(num))
 
-    # ---------- 2) "in <place>"  (but NOT "in the last ...") ----------
-    m = re.search(r"\bin\s+(?!the\s+last\b)([A-Za-z][A-Za-z0-9 _\-,]{1,80})", text, flags=re.IGNORECASE)
+    # --- 4a) "in City, ST" (US city + 2-letter state) ---
+    m_city_st = re.search(r"\bin\s+([A-Za-z .'\-]{3,}),\s*([A-Za-z]{2})\b", text, flags=re.IGNORECASE)
+    if m_city_st:
+        city = _trim_value_span(m_city_st.group(1))
+        st = m_city_st.group(2).upper()
+        # Only treat as City, ST if the left token is NOT itself a US state/abbr
+        if not _place_looks_like_state(city):
+            if has_col("city") and city:
+                add(Operator.EQ, "city", city)
+            if has_col("state") and st in _US_STATE_ABBR:
+                add(Operator.EQ, "state", st)
+            return filters  # handled; skip generic "in <place>"
+    
+    # --- 4b) "in ST1, ST2, ..." (list of 2-letter US states) ---
+    m_states = re.search(r"\bin\s+([A-Za-z]{2}(?:\s*,\s*[A-Za-z]{2})+)\b", text, flags=re.IGNORECASE)
+    if m_states and has_col("state"):
+        raw = _trim_value_span(m_states.group(1))
+        items = [x.strip().upper() for x in raw.split(",") if x.strip()]
+        if items and all(x in _US_STATE_ABBR for x in items):
+            add(Operator.IN, "state", items)
+            return filters  # handled; skip generic path
+        
+    # --- 4) geo: "in <place>" (US-only strict) + IN lists ---
+    m = re.search(r"\bin\s+(?!the\s+last\b)([A-Za-z][A-Za-z0-9 _\-,]{1,120})", text, flags=re.IGNORECASE)
     if m:
         raw = _trim_value_span(m.group(1))
         if raw:
-            pref_col = _choose_geo_column(base_table, raw, s)
+            items = [x.strip() for x in raw.split(",") if x.strip()]
+            pref_col = _choose_geo_column(base_table, items[0], s)
             if pref_col and has_col(pref_col):
                 col = _natural_to_column(base_table, pref_col, s) or pref_col
-                key = (col, raw)
-                if key not in used:
-                    used.add(key)
-                    filters.append(Filter(field=f"{base_table}.{col}", op=Operator.EQ, value=raw))
+                if len(items) == 1:
+                    add(Operator.EQ, col, items[0])
+                else:
+                    add(Operator.IN, col, items)
 
     return filters
 
@@ -690,28 +876,51 @@ class DeterministicRouter:
 
         base_table_hint = _detect_base_table_from_text(nl, self.surfaces)
 
+        # AI fallback: if we couldn't detect a base table deterministically,
+        # try entity extraction ("advertisers", "activities", etc.)
+        if not base_table_hint:
+            ents = _extract_entities(nl)
+            for t in ents.get("tables", []):
+                if t in self.surfaces.tables:
+                    base_table_hint = t
+                    break
+        
         dims, dims_table = _resolve_dimensions(intent.dim_names, self.surfaces, base_table_hint)
         mets, mets_table = _resolve_metrics(intent.met_names, self.surfaces, base_table_hint)
 
+        # If no explicit "by ..." was found but AI saw column-like words,
+        # nudge intent.dim_names so the normal resolver can map them.
+        if not intent.dim_names:
+            try:
+                ents  # reuse if we already computed it above
+            except NameError:
+                ents = _extract_entities(nl)
+            for col_token in ents.get("columns", []):
+                # Let _resolve_dimensions + _natural_to_column do the mapping;
+                # pushing bare tokens (e.g., "name") is enough.
+                if col_token not in intent.dim_names:
+                    intent.dim_names.append(col_token)
+        
         aggregate_cues = bool(dims) or bool(intent.met_names) or bool(re.search(r"\b(top|bottom|group\s+by)\b", s))
-        detail_cues = intent.is_detail_hint or bool(intent.order_field and not aggregate_cues)
+        detail_cues = intent.is_detail_hint or (bool(intent.order_items) and not aggregate_cues)
         is_detail = detail_cues and not aggregate_cues
-
+        
         base_table = _pick_base_table(nl, intent, self.surfaces, dims_table, mets_table or base_table_hint)
 
         # ORDER BY
         order_by: List[OrderBy] = []
-        if intent.order_field:
-            col = _natural_to_column(base_table, intent.order_field, self.surfaces) or intent.order_field
-            candidate = None
-            if base_table and f"{base_table}.{col}" in self.surfaces.mets:
-                candidate = f"{base_table}.{col}"
-            elif base_table and f"{base_table}.{col}" in self.surfaces.dims:
-                candidate = f"{base_table}.{col}"
-            elif base_table and col in (self.surfaces.fields_by_table.get(base_table) or []):
-                candidate = f"{base_table}.{col}"
-            direction = intent.order_dir or (Direction.DESC if re.search(r"\b(latest|recent|newest|most\s+recent)\b", s) else Direction.DESC)
-            order_by.append(OrderBy(field=candidate or col, direction=direction))
+        if intent.order_items:
+            for raw_field, raw_dir in intent.order_items:
+                col = _natural_to_column(base_table, raw_field, self.surfaces) or raw_field
+                candidate = None
+                if base_table and f"{base_table}.{col}" in self.surfaces.mets:
+                    candidate = f"{base_table}.{col}"
+                elif base_table and f"{base_table}.{col}" in self.surfaces.dims:
+                    candidate = f"{base_table}.{col}"
+                elif base_table and col in (self.surfaces.fields_by_table.get(base_table) or []):
+                    candidate = f"{base_table}.{col}"
+                default_dir = Direction.DESC if re.search(r"\b(latest|recent|newest|most\s+recent)\b", s) else Direction.ASC
+                order_by.append(OrderBy(field=candidate or col, direction=raw_dir or default_dir))
         else:
             if is_detail and re.search(r"\b(latest|recent|newest|most\s+recent)\b", s):
                 for pref in ("date_created", "date_updated"):
@@ -734,16 +943,39 @@ class DeterministicRouter:
             if peek_v:
                 is_detail = True
         
-        if is_detail:
+        # If the user didn’t ask for aggregates or groupings, default to “all base-table columns”
+        user_asked_agg = bool(intent.met_names) or bool(dims)
+        user_asked_grouping = bool(intent.dim_names)
+
+        if not user_asked_agg and not user_asked_grouping:
+            # Policy-friendly “star”: enumerate all allowed base columns explicitly
+            projections = [
+                f"{base_table}.{c}"
+                for c in (self.surfaces.fields_by_table.get(base_table) or [])
+                if f"{base_table}.{c}" not in self.surfaces.forbidden_fields
+            ]
+        else:
+            # Fall back to the curated small set
             projections = _default_projections(base_table, self.surfaces)
 
-            #  Ensure the ORDER BY column is included in projections if it's a base-table field
-            if order_by:
-                ob_field = order_by[0].field
-                if isinstance(ob_field, str) and ob_field and ob_field.startswith(base_table + "."):
-                    if ob_field not in projections:
-                        projections = [ob_field] + projections
+        
+        # Normalize natural order-by tokens to qualified fields
+        fixed_order = []
+        # Ensure ALL ORDER BY fields appear in SELECT (detail mode)
+        for ob in (order_by or []):
+            f = ob.field
+            if isinstance(f, str) and "." not in f:
+                token = f.lower().strip()
+                mapped = ORDER_ALIASES.get(token)
+                if mapped:
+                    # qualify with base_table if not already qualified
+                    f = mapped if "." in mapped else f"{base_table}.{mapped}"
+            fixed_order.append(type(ob)(field=f, direction=ob.direction, nulls=ob.nulls))
+        order_by = fixed_order
 
+        # --- DETAIL vs AGGREGATE split ---
+        if is_detail:
+            # Detail mode: enumerate base-table columns (your “star”) and return
             return LogicalQueryRequest(
                 base_table=base_table,
                 dimensions=[],
@@ -760,7 +992,9 @@ class DeterministicRouter:
                 tenant=tenant,
             )
 
-        # Aggregate path: prefer base table for dims/mets
+        # --- Aggregate path (moved up from below the old return) ---
+
+        # Prefer base table for dims
         fixed_dims: List[str] = []
         for d in dims:
             t, col = d.split(".", 1)
@@ -772,6 +1006,7 @@ class DeterministicRouter:
                     fixed_dims.append(candidates[0])
         dims = list(dict.fromkeys(fixed_dims))
 
+        # Default metric if none set
         if not mets:
             if f"{base_table}.count_rows" in self.surfaces.mets:
                 mets = [f"{base_table}.count_rows"]
@@ -796,16 +1031,15 @@ class DeterministicRouter:
             if fixed_mets:
                 mets = fixed_mets
 
-        # If user wrote "order by <dim>" for a top/bottom query, treat that <dim> as a grouping key,
-        # but enforce deterministic ranking by the metric per policy.
+        # Deterministic ranking for "top/bottom"
         rank_token = re.search(r"\b(top|bottom)\s+\d+\b", s)
-        dim_from_order: Optional[str] = None
-        if intent.order_field:
-            nat = _natural_to_column(base_table, intent.order_field, self.surfaces) or intent.order_field
-            cand_dim = f"{base_table}.{nat}"
-            if cand_dim in self.surfaces.dims and cand_dim not in dims:
-                dim_from_order = cand_dim
-                dims.append(cand_dim)
+        if rank_token and intent.order_items:
+            # If user wrote "order by <dim>", ensure that dim is grouped
+            for raw_field, _ in intent.order_items:
+                nat = _natural_to_column(base_table, raw_field, self.surfaces) or raw_field
+                cand_dim = f"{base_table}.{nat}"
+                if cand_dim in self.surfaces.dims and cand_dim not in dims:
+                    dims.append(cand_dim)
 
         order_by = list(order_by)  # copy any earlier decisions (rare in agg path)
         if rank_token and mets:

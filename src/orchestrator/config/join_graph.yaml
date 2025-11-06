@@ -1,1 +1,217 @@
-{}
+activities:
+- advertisers
+- users
+activity_logs:
+- licenses
+advertiser_activity_logs:
+- activity_logs
+advertiser_deleted_contents_for_logs:
+- contents
+advertisers:
+- dealers
+- users
+blacklisted_contents:
+- contents
+- licenses
+- playlist_contents
+content_history_logs:
+- contents
+- playlist_contents
+- playlists
+- users
+content_play_logs:
+- contents
+- licenses
+content_plays_daily:
+- contents
+- licenses
+- playlist_contents
+- playlists
+content_plays_daily_2024_july_august:
+- contents
+- licenses
+- playlist_contents
+- playlists
+content_plays_daily_logs:
+- contents
+- licenses
+- playlist_contents
+- playlists
+content_plays_daily_migration:
+- contents
+- licenses
+- playlist_contents
+- playlists
+content_plays_daily_replicate:
+- contents
+- licenses
+- playlist_contents
+- playlists
+content_plays_hourly:
+- contents
+- licenses
+- playlist_contents
+- playlists
+contents:
+- advertisers
+- dealers
+- feeds
+- hosts
+dealer_activity_logs:
+- activity_logs
+dealer_address_books:
+- dealers
+dealer_admins:
+- dealers
+- users
+dealer_contract_details:
+- dealers
+dealer_templates:
+- dealers
+- templates
+dealer_unused_contents:
+- contents
+- dealers
+dealer_values:
+- dealers
+dealers:
+- users
+dealers_contract_files:
+- dealers
+dealers_new:
+- dealers
+- users
+dealers_territory_files:
+- dealers
+feed_fillers:
+- feeds
+feed_global_settings:
+- feeds
+feed_news:
+- feeds
+feed_slides:
+- contents
+- feeds
+feed_weathers:
+- feeds
+feeds:
+- dealers
+- feed_types
+field_group_fields:
+- field_groups
+field_group_values:
+- host_field_groups
+- hosts
+filler_contents:
+- filler_groups
+filler_contents_schedule:
+- filler_contents
+- filler_groups
+filler_group_blacklisted:
+- filler_groups
+filler_group_schedules:
+- filler_contents
+- filler_groups
+filler_groups:
+- dealers
+filler_logs:
+- filler_playlists
+filler_playlist_contents:
+- contents
+- filler_playlists
+filler_playlist_dealers:
+- dealers
+- filler_playlists
+filler_playlist_groups:
+- filler_groups
+- filler_playlists
+filler_playlists:
+- dealers
+filler_playlists_20240305:
+- dealers
+- filler_playlists
+host_activity_logs:
+- activity_logs
+host_field_groups:
+- field_groups
+- hosts
+host_files:
+- hosts
+host_programmatic:
+- hosts
+host_support_tickets:
+- hosts
+hosts:
+- dealers
+- users
+hosts_import:
+- hosts
+installation_checklist_items:
+- installation_checklists
+license_favorites:
+- licenses
+- users
+license_installation_checklists:
+- installation_checklist_items
+- licenses
+license_playlist_contents:
+- licenses
+- playlist_contents
+license_screens:
+- licenses
+- screens
+licenses:
+- dealers
+- hosts
+licenses_acquired:
+- dealers
+- licenses
+notification_logs:
+- licenses
+- notifications
+placer_dumps:
+- placers
+placers:
+- hosts
+playlist_content_credits:
+- licenses
+- playlist_contents
+playlist_contents:
+- contents
+- playlists
+playlist_contents_schedule:
+- playlist_contents
+playlists:
+- dealers
+purchase_items:
+- dealers
+resource_logs:
+- licenses
+screen_template_zone_playlists:
+- playlists
+- screens
+- template_zones
+- templates
+screens:
+- dealers
+- hosts
+- screen_types
+- templates
+stripe_users:
+- dealers
+tag_details:
+- tag_types
+- tags
+tags:
+- dealers
+template_zones:
+- templates
+user_activity_logs:
+- activity_logs
+user_roles:
+- roles
+- users
+users:
+- activities
+webhooks:
+- hosts

@@ -37,18 +37,53 @@ class PolicyError(Exception):
 # ---------------- Surfaces ---------------- #
 
 class _Surfaces:
-    def __init__(self, *, entities: Dict[str, Any], fields: Dict[str, Any], dimensions: Dict[str, Any], metrics: Dict[str, Any], forbidden: Any) -> None:
+    def __init__(
+        self,
+        *,
+        entities: Dict[str, Any],
+        fields: Dict[str, Any],
+        dimensions: Dict[str, Any],
+        metrics: Dict[str, Any],
+        forbidden: Any,
+        lookup_projections: Optional[Dict[str, Any]] = None,
+    ) -> None:
         self.tables: Set[str] = set((entities or {}).keys())
         self.dimensions: Dict[str, Any] = dimensions or {}
         self.metrics: Dict[str, Any] = metrics or {}
         self.fields: Dict[str, Dict[str, Any]] = fields or {}
         self.forbidden_fields: Set[str] = _extract_forbidden_fields(forbidden)
+        # base_table -> { "other_table.col": { join: {...} } }
+        self.lookup_projections: Dict[str, Dict[str, Any]] = lookup_projections or {}
 
     def has_field(self, qualified: str) -> bool:
         if "." not in qualified:
             return False
         t, c = qualified.split(".", 1)
         return t in self.fields and isinstance(self.fields[t], dict) and c in self.fields[t]
+
+    def can_project(self, base_table: str, qualified: str) -> bool:
+        # allow base-table physical columns
+        if self.has_field(qualified) and qualified.startswith(base_table + "."):
+            return True
+        # allow whitelisted cross-table projection
+        allowed = self.lookup_projections.get(base_table) or {}
+        return qualified in allowed
+    def has_field(self, qualified: str) -> bool:
+        if "." not in qualified:
+            return False
+        t, c = qualified.split(".", 1)
+        return t in self.fields and isinstance(self.fields[t], dict) and c in self.fields[t]
+
+    def can_project(self, base_table: str, qualified: str) -> bool:
+        """
+        Projection is allowed if:
+        - it's a real field on the base table, OR
+        - it's present in lookup_projections[base_table] (safe LEFT JOIN projection)
+        """
+        if self.has_field(qualified) and qualified.startswith(base_table + "."):
+            return True
+        allowed = self.lookup_projections.get(base_table) or {}
+        return qualified in allowed
 
 def _extract_forbidden_fields(forbidden: Any) -> set[str]:
     out: set[str] = set()
@@ -74,6 +109,7 @@ def _build_surfaces(config_dir: Optional[Path]) -> _Surfaces:
         dimensions=bundle.dimensions,
         metrics=bundle.metrics,
         forbidden=bundle.forbidden,
+        lookup_projections=getattr(bundle, "lookup_projections", None),
     )
 
 
@@ -99,10 +135,14 @@ def _ensure_dims(lqr: LogicalQueryRequest, s: _Surfaces) -> None:
 def _ensure_metrics_or_projections(lqr: LogicalQueryRequest, s: _Surfaces) -> None:
     has_metrics = bool(lqr.metrics)
     has_projections = bool(lqr.projections)
-    if not has_metrics and not has_projections:
-        raise PolicyError("MISSING_PARAMETER", "Provide at least one metric or projection")
 
-    # Metrics checks (if present)
+    # Allow detail mode with implicit star (no metrics, no projections).
+    # The compiler will expand to base_table.* (excluding forbidden fields) and apply LIMIT.
+    # If you want to force explicit columns later, restore the guard below.
+    # if not has_metrics and not has_projections:
+    #     raise PolicyError("MISSING_PARAMETER", "Provide at least one metric or projection")
+    
+    # Metrics must be base-table metrics (Phase 2 keeps this strict)
     for m in lqr.metrics:
         if m not in s.metrics:
             raise PolicyError("SCHEMA_MISSING", f"Unknown metric '{m}'")
@@ -111,14 +151,20 @@ def _ensure_metrics_or_projections(lqr: LogicalQueryRequest, s: _Surfaces) -> No
         if m in s.forbidden_fields:
             raise PolicyError("FORBIDDEN_FIELD", f"Metric '{m}' is forbidden by policy")
 
-    # Projections checks (if present)
+    # Projections can be base-table fields OR whitelisted cross-table fields
     for p in lqr.projections:
-        if not s.has_field(p):
-            raise PolicyError("SCHEMA_MISSING", f"Unknown projection field '{p}'")
-        if not p.startswith(lqr.base_table + "."):
-            raise PolicyError("SCHEMA_MISMATCH", f"Projection '{p}' is not on base_table '{lqr.base_table}'")
         if p in s.forbidden_fields:
             raise PolicyError("FORBIDDEN_FIELD", f"Projection '{p}' is forbidden by policy")
+
+        # Allow base-table physical fields OR cross-table fields whitelisted in lookup_projections
+        if s.has_field(p):
+            # If it's a real field but not on the base table, only allow if whitelisted
+            if not p.startswith(lqr.base_table + ".") and not s.can_project(lqr.base_table, p):
+                raise PolicyError("SCHEMA_MISMATCH", f"Projection '{p}' is not on base_table '{lqr.base_table}'")
+        else:
+            # Not a known physical field: allow only if whitelisted
+            if not s.can_project(lqr.base_table, p):
+                raise PolicyError("SCHEMA_MISSING", f"Unknown projection field '{p}'")
 
 
 def _ensure_filters(lqr: LogicalQueryRequest, s: _Surfaces) -> None:
